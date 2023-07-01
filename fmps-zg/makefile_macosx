@@ -1,0 +1,15 @@
+
+all: macosx clean
+
+macosx: macosx-matlab-64bit
+
+macosx-matlab-64bit:
+	$(MAKE) -f makefile_macosx.mwrap TARGET=matlab-maci64-openmp clean
+	$(MAKE) -f makefile_macosx.mwrap TARGET=matlab-maci64-openmp -j
+
+clean:
+	rm -f *.o
+
+distclean:
+	rm -f *.o
+
