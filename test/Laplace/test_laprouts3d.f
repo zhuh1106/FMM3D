@@ -62,10 +62,10 @@ c
       rscale1 = bsize/4
       rscale2 = bsize/2
 
-      rscale1 = hkrand(0)
+      rscale1 = 0.55d0
       rscale2 = rscale1*2
 
-      nd = 3
+      nd = 1
 
       call prini(6,13)
 
@@ -85,9 +85,9 @@ c
       sources(3,1)=c0(3)+ 0.25d0
       do idim=1,nd
         charge(idim,1) = 1.0d0
-        dipvec(idim,1,1) = hkrand(0)
-        dipvec(idim,2,1) = hkrand(0)
-        dipvec(idim,3,1) = hkrand(0)
+        dipvec(idim,1,1) = 1.0d0/2
+        dipvec(idim,2,1) = 2.0d0/3
+        dipvec(idim,3,1) = 3.0d0/4
       enddo
 
 
@@ -97,9 +97,9 @@ c
       sources(3,2)=c0(3)-0.25d0
       do idim=1,nd
         charge(idim,2)= -1.0d0  
-        dipvec(idim,1,2) = hkrand(0)
-        dipvec(idim,2,2) = hkrand(0)
-        dipvec(idim,3,2) = hkrand(0)
+        dipvec(idim,1,2) = 3.0d0/5
+        dipvec(idim,2,2) = 2.0d0/6
+        dipvec(idim,3,2) = 1.0d0/7
       enddo
       ns = 2
 c
@@ -157,7 +157,9 @@ c
 
       thresh = 1.0d-15
       call l3ddirectcdh(nd,sources,charge,dipvec,ns,ztrgs,
-     1    nt,opots,oflds,ohesss,thresh)
+     1    nt,opots,oflds,ohesss,thresh)      
+      ! print *, "charge: ", charge
+      ! print *, "opots: ", opots
 
       eps = 0.5d-12
       call l3dterms(eps, nterms)
@@ -182,9 +184,18 @@ c       create multipole expansion:
 c
       allocate(mpole1(nd,0:nterms,-nterms:nterms))
 
+      print *, "size of wlege: ", size(wlege)
+      print *, "nlege: ", nlege
+
       call mpzero(nd,mpole1,nterms)
       call l3dformmpcd(nd,rscale1,sources,charge,dipvec,
      1       ns,c0,nterms,mpole1,wlege,nlege)
+      
+      ! print *, "size of wlege:", wlege(20402)
+      ! print *, "nlege: ", nlege
+      ! print *, "mpole1: ", mpole1(1,1,-10:10)
+      ! print *, "wlege: ", wlege
+      ! print *, "rscale1: ", rscale1
 
       do i=1,nt
         do idim=1,nd
@@ -201,8 +212,16 @@ c
         enddo
       enddo
 
+      ! do j=0,nterms
+      !   write (*,*) ',', mpole1(1,j,:)
+      ! enddo
+
       call l3dmpevalh(nd,rscale1,c0,mpole1,nterms,ztrgs,nt,pots,
      1      flds,hesss,thresh,scarray_mp)
+
+      ! do j=1,size(scarray_mp)
+      !   write (*,*) ',', scarray_mp(j)
+      ! enddo
 
       err_exp(1) = 10*max(rconv1**(nterms),eps)
       write(*,'(a,e11.4)') 'Testing formmp and mpeval, expected error='

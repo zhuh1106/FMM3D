@@ -96,7 +96,7 @@ COMOBJS = $(COM)/besseljs3d.o $(COM)/cdjseval3d.o $(COM)/dfft.o \
 	$(COM)/fmmcommon.o $(COM)/legeexps.o $(COM)/prini.o \
 	$(COM)/rotgen.o $(COM)/rotproj.o $(COM)/rotviarecur.o \
 	$(COM)/tree_routs3d.o $(COM)/pts_tree3d.o $(COM)/yrecursion.o \
-	$(COM)/cumsum.o
+	$(COM)/cumsum.o test/Laplace/pts_tree3d0.o
 
 # Helmholtz objects
 HELM = src/Helmholtz
@@ -111,7 +111,7 @@ LAP = src/Laplace
 LOBJS = $(LAP)/lwtsexp_sep1.o $(LAP)/l3dterms.o $(LAP)/l3dtrans.o \
 	$(LAP)/laprouts3d.o $(LAP)/lfmm3d.o $(LAP)/lfmm3d_mps.o $(LAP)/lfmm3dwrap.o \
 	$(LAP)/lfmm3dwrap_legacy.o $(LAP)/lfmm3dwrap_vec.o $(LAP)/lwtsexp_sep2.o \
-	$(LAP)/lpwrouts.o $(LAP)/lfmm3d_ndiv.o
+	$(LAP)/lpwrouts.o $(LAP)/lfmm3d_ndiv.o test/Laplace/lfmm3d_mps0.o
 
 # Stokes objects
 STOK = src/Stokes
@@ -463,7 +463,7 @@ clean: objclean
 	rm -rf python/build
 	rm -rf python/dist
 	rm -rf python/fmm3dpy.egg-info
-	rm -rf matlab/*.mex*
+#	rm -rf matlab/*.mex*
 	rm -f examples/lfmm3d_example
 	rm -f examples/lfmm3d_vec_example
 	rm -f examples/lfmm3d_legacy_example

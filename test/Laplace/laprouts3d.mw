@@ -1,0 +1,198 @@
+% MWrap file 
+
+@function [pottarg, gradtarg, hesstarg] = l3ddirectcdh_mex(nd, sources, charges, dipoles, ns, targ, nt, pottarg, gradtarg, hesstarg, thresh)
+nd3 = 3*nd;
+nd6 = 6*nd;
+dipoles = reshape(dipoles,nd3,ns);
+gradtarg = reshape(gradtarg,nd3,nt);
+hesstarg = reshape(hesstarg,nd6,nt);
+# FORTRAN l3ddirectcdh(int[1] nd,  double[3,ns] sources, double[nd,ns] charges, double[nd3,ns] dipoles, int[1] ns, double[3,nt] targ, int[1] nt, inout double[nd,nt] pottarg, inout double[nd3,nt] gradtarg, inout double[nd6,nt] hesstarg, double[1] thresh);
+gradtarg = reshape(gradtarg,nd,3,nt);
+hesstarg = reshape(hesstarg,nd,6,nt);
+end
+
+@function nterms = l3dterms_mex(eps, nterms)
+# FORTRAN l3dterms(double[1] eps, inout int[1] nterms);
+end
+
+@function [w,lused] = ylgndrfwini_mex(nmax, w, lw, lused)
+nw = length(w);
+# FORTRAN ylgndrfwini(int[1] nmax, inout double[nw] w, int[1] lw, inout int[1] lused);
+end
+
+@function scarray = l3dmpevalhessdini_mex(nterms,scarray)
+nscarray = length(scarray);
+# FORTRAN l3dmpevalhessdini(int[1] nterms, inout double[nscarray] scarray);
+end
+
+@function scarray = l3dtaevalhessdini_mex(nterms,scarray)
+nscarray = length(scarray);
+# FORTRAN l3dtaevalhessdini(int[1] nterms, inout double[nscarray] scarray);
+end
+
+@function mpole = mpzero_mex(nd,mpole,nterms)
+ndnterms = nd*(nterms+1);
+ntermst2p1 = 2*nterms+1;
+mpole = reshape(mpole,ndnterms,ntermst2p1);
+# FORTRAN mpzero(int[1] nd, inout dcomplex[ndnterms,ntermst2p1] mpole, int[1] nterms);
+mpole = reshape(mpole,nd,nterms+1,ntermst2p1);
+end
+
+@function mpole = l3dformmpcd_mex(nd,rscale,sources,charge,dipvec,ns,center,nterms,mpole,wlege,nlege)
+nd3 = 3*nd;
+ndnterms = nd*(nterms+1);
+ntermst2p1 = 2*nterms+1;
+% nlege1 = nlege+1; % although wlege is defined with dimension nlege1^2, it is actually 2*(nlege+1)^2 
+nwlege = numel(wlege);
+dipvec = reshape(dipvec,nd3,ns);
+mpole = reshape(mpole,ndnterms,ntermst2p1);
+# FORTRAN l3dformmpcd(int[1] nd, double[1] rscale, double[3,ns] sources, double[nd,ns] charge, double[nd3,ns] dipvec, int[1] ns, double[3] center, int[1] nterms, inout dcomplex[ndnterms,ntermst2p1] mpole, double[nwlege] wlege, int[1] nlege);
+mpole = reshape(mpole,nd,nterms+1,2*nterms+1);
+end
+
+@function dc = getsqrtbinomialcoeffs_mex(n,dc)
+n1 = n+1;
+# FORTRAN getsqrtbinomialcoeffs(int[1] n, inout double[n1,n1] dc);
+end
+
+@function mpolen = l3dmpmp_mex(nd,sc1,x0y0z0,mpole,nterms,sc2,xnynzn,mpolen,nterms2,dc,lca)
+ndnterms = nd*(nterms+1);
+ntermst2p1 = 2*nterms+1;
+mpole = reshape(mpole,ndnterms,ntermst2p1);
+ndnterms2 = nd*(nterms2+1);
+nterms2t2p1 = 2*nterms2+1;
+mpolen = reshape(mpolen,ndnterms2,nterms2t2p1);
+lca1 = lca+1;
+# FORTRAN l3dmpmp(int[1] nd, double[1] sc1, double[3] x0y0z0, dcomplex[ndnterms,ntermst2p1] mpole, int[1] nterms, double[1] sc2, double[3] xnynzn, inout dcomplex[ndnterms2,nterms2t2p1] mpolen, int[1] nterms2, double[lca1,lca1] dc, int[1] lca);
+mpolen = reshape(mpolen,nd,nterms2+1,2*nterms2+1);
+end
+
+@function [pot,grad,hess] = l3dmpevalh_mex(nd,rscale,center,mpole,nterms,ztarg,nt,pot,grad,hess,thresh,scarray)
+nd3 = 3*nd;
+nd6 = 6*nd;
+ndnterms = nd*(nterms+1);
+ntermst2p1 = 2*nterms+1;
+mpole = reshape(mpole,ndnterms,ntermst2p1);
+grad = reshape(grad,nd3,nt);
+hess = reshape(hess,nd6,nt);
+nscarray = length(scarray);
+# FORTRAN l3dmpevalh(int[1] nd, double[1] rscale, double[3] center, dcomplex[ndnterms,ntermst2p1] mpole, int[1] nterms, double[3,nt] ztarg, int[1] nt, inout double[nd,nt] pot, inout double[nd3,nt] grad, inout double[nd6,nt] hess, double[1] thresh, double[nscarray] scarray);
+grad = reshape(grad,nd,3,nt);
+hess = reshape(hess,nd,6,nt);
+end
+
+@function local = l3dmploc_mex(nd,sc1,x0y0z0,mpole,nterms,sc2,xnynzn,local,nterms2,dc,lca)
+ndnterms = nd*(nterms+1);
+ntermst2p1 = 2*nterms+1;
+mpole = reshape(mpole,ndnterms,ntermst2p1);
+ndnterms2 = nd*(nterms2+1);
+nterms2t2p1 = 2*nterms2+1;
+local = reshape(local,ndnterms2,nterms2t2p1);
+lca1 = lca+1;
+# FORTRAN l3dmploc(int[1] nd, double[1] sc1, double[3] x0y0z0, dcomplex[ndnterms,ntermst2p1] mpole, int[1] nterms, double[1] sc2, double[3] xnynzn, inout dcomplex[ndnterms2,nterms2t2p1] local, int[1] nterms2, double[lca1,lca1] dc, int[1] lca);
+local = reshape(local,nd,nterms2+1,nterms2t2p1);
+end
+
+@function [pot,grad,hess] = l3dtaevalh_mex(nd,rscale,center,local,nterms,ztarg,ntarg,pot,grad,hess,scarray)
+nd3 = 3*nd;
+nd6 = 6*nd;
+ndnterms = nd*(nterms+1);
+ntermst2p1 = 2*nterms+1;
+local = reshape(local,ndnterms,ntermst2p1);
+grad = reshape(grad,nd3,ntarg);
+hess = reshape(hess,nd6,ntarg);
+nscarray = length(scarray);
+# FORTRAN l3dtaevalh(int[1] nd, double[1] rscale, double[3] center, dcomplex[ndnterms,ntermst2p1] local, int[1] nterms, double[3,ntarg] ztarg, int[1] ntarg, inout double[nd,ntarg] pot, inout double[nd3,ntarg] grad, inout double[nd6,ntarg] hess, double[nscarray] scarray);
+grad = reshape(grad,nd,3,ntarg);
+hess = reshape(hess,nd,6,ntarg);
+end
+
+@function local = l3dlocloc_mex(nd,sc1,x0y0z0,locold,nterms,sc2,xnynzn,local,nterms2,dc,lda)
+ndnterms = nd*(nterms+1);
+ntermst2p1 = 2*nterms+1;
+locold = reshape(locold,ndnterms,ntermst2p1);
+ndnterms2 = nd*(nterms2+1);
+nterms2t2p1 = 2*nterms2+1;
+local = reshape(local,ndnterms2,nterms2t2p1);
+lda1 = lda+1;
+# FORTRAN l3dlocloc(int[1] nd, double[1] sc1, double[3] x0y0z0, dcomplex[ndnterms,ntermst2p1] locold, int[1] nterms, double[1] sc2, double[3] xnynzn, inout dcomplex[ndnterms2,nterms2t2p1] local, int[1] nterms2, double[lda1,lda1] dc, int[1] lda);
+local = reshape(local,nd,nterms2+1,nterms2t2p1);
+end
+
+@function mpole = l3dformtacd_mex(nd,rscale,sources,charge,dipvec,ns,center,nterms,mpole,wlege,nlege)
+nd3 = 3*nd;
+nd6 = 6*nd;
+dipvec = reshape(dipvec,nd3,ns);
+ndnterms = nd*(nterms+1);
+ntermst2p1 = 2*nterms+1;
+mpole = reshape(mpole,ndnterms,ntermst2p1);
+% nlege1 = nlege+1; % although wlege is defined with dimension nlege1^2, it is actually 2*(nlege+1)^2 
+nwlege = numel(wlege);
+# FORTRAN l3dformtacd(int[1] nd, double[1] rscale, double[3,ns] sources, double[nd,ns] charge, double[nd3,ns] dipvec, int[1] ns, double[3] center, int[1] nterms, inout dcomplex[ndnterms,ntermst2p1] mpole, double[nwlege] wlege, int[1] nlege);
+mpole = reshape(mpole,nd,nterms+1,2*nterms+1);
+end
+
+@function hkrand = hkrand_mex(iseed_hk)
+# double hkrand = FORTRAN hkrand(int[1] iseed_hk);
+end
+
+@function mpole = l3dformmpc_mex(nd,rscale,sources,charge,ns,center,nterms,mpole,wlege,nlege)
+ndnterms = nd*(nterms+1);
+ntermst2p1 = 2*nterms+1;
+mpole = reshape(mpole,ndnterms,ntermst2p1);
+nwlege = numel(wlege);
+# FORTRAN l3dformmpc(int[1] nd, double[1] rscale, double[3,ns] sources, double[nd,ns] charge, int[1] ns, double[3] center, int[1] nterms, inout dcomplex[ndnterms,ntermst2p1] mpole, double[nwlege] wlege, int[1] nlege);
+mpole = reshape(mpole,nd,nterms+1,2*nterms+1);
+end
+
+%@function [pot,grad,hess,pottarg,gradtarg,hesstarg] = lfmm3d_mex(nd,eps,ns,source,ifcharge,charge,ifdipole,dipvec,iper,ifpgh,pot,grad,hess,nt,targ,ifpghtarg,pottarg,gradtarg,hesstarg,ier)
+%% need to take care of ns or nt = 0 ?
+%nd3 = nd*3;
+%nd6 = nd*6;
+%dipvec = reshape(dipvec,nd3,ns);
+%grad = reshape(grad,nd3,ns);
+%hess = reshape(hess,nd6,ns);
+%gradtarg = reshape(gradtarg,nd3,nt);
+%hesstarg = reshape(hesstarg,nd6,nt);
+%# FORTRAN lfmm3d(int[1] nd, double[1] eps, int[1] ns, double[3,ns] source, int[1] ifcharge, double[nd,ns] charge, int[1] ifdipole, double[nd3,ns] dipvec, int[1] iper, int[1] ifpgh, inout double[nd,ns] pot, inout double[nd3,ns] grad, inout double[nd6,ns] hess, int[1] nt, double[3,nt] targ, int[1] ifpghtarg, inout double[nd,nt] pottarg, inout double[nd3,nt] gradtarg, inout double[nd6,nt] hesstarg, int[1] ier);
+%grad = reshape(grad,nd,3,ns);
+%hess = reshape(hess,nd,6,ns);
+%gradtarg = reshape(gradtarg,nd,3,nt);
+%hesstarg = reshape(hesstarg,nd,6,nt);
+%end
+
+@function local = lfmm3d_mps0_mex(nd, eps ,nmpole, cmpole, rmpole, mterms, mpole, impole, local, ier)
+ntmp = numel(mpole);
+mtmp = numel(local);
+# FORTRAN lfmm3dmps0(int[1] nd, double[1] eps , int[1] nmpole, double[3,nmpole] cmpole, double[nmpole] rmpole, int[nmpole] mterms, dcomplex[ntmp] mpole, int[nmpole] impole, inout dcomplex[mtmp] local, int[1] ier);
+end
+
+@function pot = l3dtaevalp_mex(nd,rscale,center,mpole,nterms,ztarg,ntarg,pot,wlege,nlege)
+ndnterms = nd*(nterms+1);
+ntermst2p1 = 2*nterms+1;
+mpole = reshape(mpole,ndnterms,ntermst2p1);
+nwlege = numel(wlege);
+# FORTRAN l3dtaevalp(int[1] nd, double[1] rscale, double[3] center, dcomplex[ndnterms,ntermst2p1] mpole, int[1] nterms, double[3,ntarg] ztarg, int[1] ntarg, inout double[nd,ntarg] pot, double[nwlege] wlege, int[1] nlege);
+end
+
+@function  [nlevels,nboxes,ltree] = pts_tree_mem_mex(src,ns,targ,nt,idivflag,ndiv,nlmin,nlmax,ifunif,iper,nlevels,nboxes,ltree)
+if nt == 0 
+    targ = zeros(3,1); 
+    # FORTRAN ptstreemem(double[3,ns] src, int[1] ns, double[3,1] targ, int[1] nt, int[1] idivflag, int[1] ndiv, int[1] nlmin, int[1] nlmax, int[1] ifunif, int[1] iper, inout int[1] nlevels, inout int[1] nboxes, inout int[1] ltree);
+else
+    # FORTRAN ptstreemem(double[3,ns] src, int[1] ns, double[3,nt] targ, int[1] nt, int[1] idivflag, int[1] ndiv, int[1] nlmin, int[1] nlmax, int[1] ifunif, int[1] iper, inout int[1] nlevels, inout int[1] nboxes, inout int[1] ltree);    
+end % is this ok?
+
+end
+
+@function [itree,iptr,centers,boxsize] = pts_tree_build_mex(src,ns,targ,nt,idivflag,ndiv,nlmin,nlmax,ifunif,iper,nlevels,nboxes,ltree,itree,iptr,centers,boxsize)
+nlevels1 = nlevels+1;
+ntuse = max(nt,1);
+if nt == 0, targ = zeros(3,1); end
+# FORTRAN ptstreebuild( double[3,ns] src, int[1] ns, double[3,ntuse] targ, int[1] nt, int[1] idivflag, int[1] ndiv, int[1] nlmin, int[1] nlmax, int[1] ifunif, int[1] iper, int[1] nlevels, int[1] nboxes, int[1] ltree, inout int[ltree] itree, inout int[8] iptr, inout double[3,nboxes] centers, inout double[nlevels1] boxsize);
+%ptstreebuild(src,ns,targ,nt,idivflag,ndiv,nlmin,nlmax,ifunif,iper,nlevels,nboxes,ltree,itree,iptr,centers,boxsize);
+end
+
+@function [ixy,ixyse] = pts_tree_sort_mex(n,xys,itree,ltree,nboxes,nlevels,iptr,centers,ixy,ixyse)
+# FORTRAN ptstreesort(int[1] n, double[3,n] xys, int[ltree] itree, int[1] ltree, int[1] nboxes, int[1] nlevels, int[8] iptr, double[3,nboxes] centers, inout int[n] ixy, inout int[2,nboxes] ixyse);
+end
