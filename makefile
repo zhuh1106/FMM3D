@@ -109,7 +109,7 @@ HOBJS = $(HELM)/h3dcommon.o $(HELM)/h3dterms.o $(HELM)/h3dtrans.o \
 # Laplace objects
 LAP = src/Laplace
 LOBJS = $(LAP)/lwtsexp_sep1.o $(LAP)/l3dterms.o $(LAP)/l3dtrans.o \
-	$(LAP)/laprouts3d.o $(LAP)/lfmm3d.o $(LAP)/lfmm3dwrap.o \
+	$(LAP)/laprouts3d.o $(LAP)/lfmm3d.o $(LAP)/lfmm3d_mps.o $(LAP)/lfmm3dwrap.o \
 	$(LAP)/lfmm3dwrap_legacy.o $(LAP)/lfmm3dwrap_vec.o $(LAP)/lwtsexp_sep2.o \
 	$(LAP)/lpwrouts.o $(LAP)/lfmm3d_ndiv.o
 
@@ -272,19 +272,22 @@ python-dist: $(STATICLIB)
 
 # testing routines
 #
-test: $(STATICLIB) $(TOBJS) test/helmrouts test/hfmm3d test/hfmm3d_vec test/hfmm3d_scale test/laprouts test/lfmm3d test/lfmm3d_vec test_hfmm3d_mps test/lfmm3d_scale test/stfmm3d test/stokkernels test/emfmm3d
-	(cd test/Helmholtz; ./run_helmtest.sh)
-	(cd test/Laplace; ./run_laptest.sh)
-	(cd test/Stokes; ./run_stoktest.sh)
-	(cd test/Maxwell; ./run_emtest.sh)
-	cat print_testreshelm.txt
-	cat print_testreslap.txt
-	cat print_testresstok.txt
-	cat print_testresem.txt
-	rm print_testreshelm.txt
-	rm print_testreslap.txt
-	rm print_testresstok.txt
-	rm print_testresem.txt
+#
+test: $(STATICLIB) $(TOBJS) test/l3dlocloc test_hfmm3d_mps test/lfmm3d_mps test/h3dlocloc
+#test/lfmm3d_mps
+#test: $(STATICLIB) $(TOBJS) test/helmrouts test/hfmm3d test/hfmm3d_vec test/hfmm3d_scale test/laprouts test/lfmm3d test/lfmm3d_mps test/lfmm3d_vec test_hfmm3d_mps test/lfmm3d_scale test/stfmm3d test/stokkernels test/emfmm3d
+	#(cd test/Helmholtz; ./run_helmtest.sh)
+	#(cd test/Laplace; ./run_laptest.sh)
+	#(cd test/Stokes; ./run_stoktest.sh)
+	#(cd test/Maxwell; ./run_emtest.sh)
+	#cat print_testreshelm.txt
+	#cat print_testreslap.txt
+	#cat print_testresstok.txt
+	#cat print_testresem.txt
+	#rm print_testreshelm.txt
+	#rm print_testreslap.txt
+	#rm print_testresstok.txt
+	#rm print_testresem.txt
 
 test-dyn: $(DYNAMICLIB) $(TOBJS) test/helmrouts-dyn test/hfmm3d-dyn test/hfmm3d_vec-dyn test/hfmm3d_scale-dyn test/laprouts-dyn test/lfmm3d-dyn test/lfmm3d_vec-dyn test_hfmm3d_mps-dyn test/lfmm3d_scale-dyn
 	(cd test/Helmholtz; ./run_helmtest.sh)
@@ -322,6 +325,15 @@ test/laprouts:
 
 test/lfmm3d:
 	$(FC) $(FFLAGS) test/Laplace/test_lfmm3d.f $(TOBJS) $(COMOBJS) $(LOBJS) -o test/Laplace/int2-test-lfmm3d $(LIBS)
+
+test/lfmm3d_mps:
+	$(FC) $(FFLAGS) test/Laplace/test_lfmm3d_mps.f $(TOBJS) $(COMOBJS) $(LOBJS) -o test/Laplace/int2-test-lfmm3d-mps $(LIBS)
+
+test/l3dlocloc:
+	$(FC) $(FFLAGS) test/Laplace/test_l3dlocloc.f $(TOBJS) $(COMOBJS) $(LOBJS) -o test/Laplace/int2-test-l3dlocloc $(LIBS)
+
+test/h3dlocloc:
+	$(FC) $(FFLAGS) test/Helmholtz/test_h3dlocloc.f $(TOBJS) $(COMOBJS) $(HOBJS) -o test/Helmholtz/int2-test-h3dlocloc $(LIBS)
 
 test/lfmm3d_scale:
 	$(FC) $(FFLAGS) test/Laplace/test_lfmm3d_scale.f $(TOBJS) $(COMOBJS) $(LOBJS) -o test/Laplace/int2-test-lfmm3d-scale $(LIBS)

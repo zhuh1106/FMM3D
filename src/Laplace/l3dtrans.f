@@ -563,10 +563,10 @@ c     I.e. rotation of -THETA radians about the Yprime axis.
 c
       if(nterms.ge.30) then
         call rotviaproj(nd,-theta,nterms2,nterms2,nterms2,marray1,
-     1     ldc,marray,ldc)
+     1     nterms2,marray,ldc)
       else
         call rotviarecur(nd,-theta,nterms2,nterms2,nterms2,marray1,
-     1     ldc,marray,ldc)
+     1     nterms2,marray,ldc)
       endif
 c
 c----- rotate back PHI radians about the Z-axis in the above system.
