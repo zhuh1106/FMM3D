@@ -3926,8 +3926,7 @@ mw_err_label:
 }
 
 /* ---- laprouts3d.mw: 181 ----
- * ptstreemem(double[3, ns] src, int[1] ns, double[3, 1] targ, int[1] nt, int[1] idivflag, int[1] ndiv, int[1] nlmin, int[1] nlmax, int[1] ifunif, int[1] iper, inout int[1] nlevels, inout int[1] nboxes, inout int[1] ltree);
- * Also at laprouts3d.mw: 183
+ * ptstreemem(double[3, ns] src, int[1] ns, double[3, ntuse] targ, int[1] nt, int[1] idivflag, int[1] ndiv, int[1] nlmin, int[1] nlmax, int[1] ifunif, int[1] iper, inout int[1] nlevels, inout int[1] nboxes, inout int[1] ltree);
  */
 static const char* stubids19_ = "ptstreemem(i double[xx], i int[x], i double[xx], i int[x], i int[x], i int[x], i int[x], i int[x], i int[x], i int[x], io int[x], io int[x], io int[x])";
 
@@ -3952,7 +3951,7 @@ void mexStub19(int nlhs, mxArray* plhs[],
     mwSize      dim14_;   /* ns         */
     mwSize      dim15_;   /* 1          */
     mwSize      dim16_;   /* 3          */
-    mwSize      dim17_;   /* 1          */
+    mwSize      dim17_;   /* ntuse      */
     mwSize      dim18_;   /* 1          */
     mwSize      dim19_;   /* 1          */
     mwSize      dim20_;   /* 1          */
@@ -4150,12 +4149,12 @@ mw_err_label:
         mexErrMsgTxt(mw_err_txt_);
 }
 
-/* ---- laprouts3d.mw: 192 ----
+/* ---- laprouts3d.mw: 188 ----
  * ptstreebuild(double[3, ns] src, int[1] ns, double[3, ntuse] targ, int[1] nt, int[1] idivflag, int[1] ndiv, int[1] nlmin, int[1] nlmax, int[1] ifunif, int[1] iper, int[1] nlevels, int[1] nboxes, int[1] ltree, inout int[ltree] itree, inout int[8] iptr, inout double[3, nboxes] centers, inout double[nlevels1] boxsize);
  */
-static const char* stubids21_ = "ptstreebuild(i double[xx], i int[x], i double[xx], i int[x], i int[x], i int[x], i int[x], i int[x], i int[x], i int[x], i int[x], i int[x], i int[x], io int[x], io int[x], io double[xx], io double[x])";
+static const char* stubids20_ = "ptstreebuild(i double[xx], i int[x], i double[xx], i int[x], i int[x], i int[x], i int[x], i int[x], i int[x], i int[x], i int[x], i int[x], i int[x], io int[x], io int[x], io double[xx], io double[x])";
 
-void mexStub21(int nlhs, mxArray* plhs[],
+void mexStub20(int nlhs, mxArray* plhs[],
               int nrhs, const mxArray* prhs[])
 {
     const char* mw_err_txt_ = 0;
@@ -4405,7 +4404,7 @@ void mexStub21(int nlhs, mxArray* plhs[],
     } else
         in16_ = NULL;
     if (mexprofrecord_)
-        mexprofrecord_[21]++;
+        mexprofrecord_[20]++;
     MWF77_ptstreebuild(in0_, in1_, in2_, in3_, in4_, in5_, in6_, in7_, in8_, in9_, in10_, in11_, in12_, in13_, in14_, in15_, in16_);
     plhs[0] = mxCreateDoubleMatrix(dim32_, 1, mxREAL);
     mxWrapCopy_int(plhs[0], in13_, dim32_);
@@ -4436,12 +4435,12 @@ mw_err_label:
         mexErrMsgTxt(mw_err_txt_);
 }
 
-/* ---- laprouts3d.mw: 197 ----
+/* ---- laprouts3d.mw: 193 ----
  * ptstreesort(int[1] n, double[3, n] xys, int[ltree] itree, int[1] ltree, int[1] nboxes, int[1] nlevels, int[8] iptr, double[3, nboxes] centers, inout int[n] ixy, inout int[2, nboxes] ixyse);
  */
-static const char* stubids22_ = "ptstreesort(i int[x], i double[xx], i int[x], i int[x], i int[x], i int[x], i int[x], i double[xx], io int[x], io int[xx])";
+static const char* stubids21_ = "ptstreesort(i int[x], i double[xx], i int[x], i int[x], i int[x], i int[x], i int[x], i double[xx], io int[x], io int[xx])";
 
-void mexStub22(int nlhs, mxArray* plhs[],
+void mexStub21(int nlhs, mxArray* plhs[],
               int nrhs, const mxArray* prhs[])
 {
     const char* mw_err_txt_ = 0;
@@ -4600,7 +4599,7 @@ void mexStub22(int nlhs, mxArray* plhs[],
     } else
         in9_ = NULL;
     if (mexprofrecord_)
-        mexprofrecord_[22]++;
+        mexprofrecord_[21]++;
     MWF77_ptstreesort(in0_, in1_, in2_, in3_, in4_, in5_, in6_, in7_, in8_, in9_);
     plhs[0] = mxCreateDoubleMatrix(dim20_, 1, mxREAL);
     mxWrapCopy_int(plhs[0], in8_, dim20_);
@@ -4671,16 +4670,16 @@ void mexFunction(int nlhs, mxArray* plhs[],
         mexStub18(nlhs,plhs, nrhs-1,prhs+1);
     else if (strcmp(id, stubids19_) == 0)
         mexStub19(nlhs,plhs, nrhs-1,prhs+1);
+    else if (strcmp(id, stubids20_) == 0)
+        mexStub20(nlhs,plhs, nrhs-1,prhs+1);
     else if (strcmp(id, stubids21_) == 0)
         mexStub21(nlhs,plhs, nrhs-1,prhs+1);
-    else if (strcmp(id, stubids22_) == 0)
-        mexStub22(nlhs,plhs, nrhs-1,prhs+1);
     else if (strcmp(id, "*profile on*") == 0) {
         if (!mexprofrecord_) {
-            mexprofrecord_ = (int*) malloc(23 * sizeof(int));
+            mexprofrecord_ = (int*) malloc(22 * sizeof(int));
             mexLock();
         }
-        memset(mexprofrecord_, 0, 23 * sizeof(int));
+        memset(mexprofrecord_, 0, 22 * sizeof(int));
     } else if (strcmp(id, "*profile off*") == 0) {
         if (mexprofrecord_) {
             free(mexprofrecord_);
@@ -4708,9 +4707,9 @@ void mexFunction(int nlhs, mxArray* plhs[],
         mexPrintf("%d calls to laprouts3d.mw:144\n", mexprofrecord_[16]);
         mexPrintf("%d calls to laprouts3d.mw:167\n", mexprofrecord_[17]);
         mexPrintf("%d calls to laprouts3d.mw:175\n", mexprofrecord_[18]);
-        mexPrintf("%d calls to laprouts3d.mw:181 (laprouts3d.mw:183)\n", mexprofrecord_[19]);
-        mexPrintf("%d calls to laprouts3d.mw:192\n", mexprofrecord_[21]);
-        mexPrintf("%d calls to laprouts3d.mw:197\n", mexprofrecord_[22]);
+        mexPrintf("%d calls to laprouts3d.mw:181\n", mexprofrecord_[19]);
+        mexPrintf("%d calls to laprouts3d.mw:188\n", mexprofrecord_[20]);
+        mexPrintf("%d calls to laprouts3d.mw:193\n", mexprofrecord_[21]);
     } else if (strcmp(id, "*profile log*") == 0) {
         FILE* logfp;
         if (nrhs != 2 || mxGetString(prhs[1], id, sizeof(id)) != 0)
@@ -4738,9 +4737,9 @@ void mexFunction(int nlhs, mxArray* plhs[],
         fprintf(logfp, "%d calls to laprouts3d.mw:144\n", mexprofrecord_[16]);
         fprintf(logfp, "%d calls to laprouts3d.mw:167\n", mexprofrecord_[17]);
         fprintf(logfp, "%d calls to laprouts3d.mw:175\n", mexprofrecord_[18]);
-        fprintf(logfp, "%d calls to laprouts3d.mw:181 (laprouts3d.mw:183)\n", mexprofrecord_[19]);
-        fprintf(logfp, "%d calls to laprouts3d.mw:192\n", mexprofrecord_[21]);
-        fprintf(logfp, "%d calls to laprouts3d.mw:197\n", mexprofrecord_[22]);
+        fprintf(logfp, "%d calls to laprouts3d.mw:181\n", mexprofrecord_[19]);
+        fprintf(logfp, "%d calls to laprouts3d.mw:188\n", mexprofrecord_[20]);
+        fprintf(logfp, "%d calls to laprouts3d.mw:193\n", mexprofrecord_[21]);
         fclose(logfp);
     } else
         mexErrMsgTxt("Unknown identifier");

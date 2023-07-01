@@ -35,6 +35,7 @@ c
        integer idivflag, ndiv, nboxes, nlevels
        integer nlmax, nlmin, ifunif
        integer *8 ipointer(8),ltree
+       integer ipointer4(8),ltree4
        integer, allocatable :: itree(:)
        integer, allocatable :: isrcse(:,:),isrc(:)
        integer itargtree, ntargtree
@@ -366,7 +367,7 @@ c
 cc
 c
        iert = 0
-       ntargtree = 1
+       ntargtree = 0
        targtree(1) = 0
        targtree(2) = 0
        targtree(3) = 0
@@ -374,39 +375,28 @@ c
 c
 cc     memory management code for contructing level restricted tree
        call ptstreemem(cmpole,nmpole,targtree,ntargtree,idivflag,ndiv,
-     1      nlmin,nlmax,iper,ifunif,nlevels,nboxes,ltree)
+     1      nlmin,nlmax,iper,ifunif,nlevels,nboxes,ltree4)
+c      to avoid integer 8 mex crash...     
+       ltree = int(ltree4, 8)
       
        allocate(itree(ltree))
        allocate(boxsize(0:nlevels))
        allocate(treecenters(3,nboxes))
 
-      !  print *, "cmpole = ", cmpole
-       print *, "nmpole = ", nmpole
-       print *, "targtree = ", targtree
-       print *, "ntargtree = ", ntargtree
-       print *, "idivflag = ", idivflag
-       print *, "ndiv = ", ndiv
-       print *, "nlmin = ", nlmin
-       print *, "nlmax = ", nlmax
-       print *, "iper = ", iper
-       print *, "ifunif = ", ifunif
-       print *, "nlevels = ", nlevels
-       print *, "nboxes = ", nboxes
-       print *, "ltree = ", ltree
-
 c       Call tree code
 c      input order of ifunif&iper is not consistent with pts_tree_build 
 c      subroutine
        call ptstreebuild(cmpole,nmpole,targtree,ntargtree,idivflag,
-     1      ndiv,nlmin,nlmax,ifunif,iper,nlevels,nboxes,ltree,itree,
-     2      ipointer,treecenters,boxsize)
+     1      ndiv,nlmin,nlmax,iper,ifunif,nlevels,nboxes,ltree4,itree,
+     2      ipointer4,treecenters,boxsize)
+       ipointer = int(ipointer4, 8)
       
 
        allocate(isrcse(2,nboxes))
        allocate(isrc(nmpole))
 
-       call ptstreesort(nmpole,cmpole,itree,ltree,nboxes,nlevels,
-     1      ipointer,treecenters,isrc,isrcse)
+       call ptstreesort(nmpole,cmpole,itree,ltree4,nboxes,nlevels,
+     1      ipointer4,treecenters,isrc,isrcse)
       
 c
 cc     end of tree build
@@ -523,7 +513,6 @@ C$     time1=omp_get_wtime()
      $            nboxes,iper,boxsize,treecenters,isrcse,
      $            scales,laddr,nterms,ier)
        if(ier.ne.0) return
-
        call cpu_time(time2)
 C$     time2=omp_get_wtime()
        timeinfo(6) = time2-time1
@@ -532,11 +521,9 @@ C$     time2=omp_get_wtime()
        do i = 1,6
          d = d + timeinfo(i)
        enddo
-
        if(ifprint.ge.1) call prin2('sum(timeinfo)=*',d,1)
-
-
        if(ier.ne.0) return
+       
 
        do i = 1,nmpole
          mt = mtermssort(i)

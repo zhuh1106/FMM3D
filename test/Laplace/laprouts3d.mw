@@ -176,13 +176,9 @@ nwlege = numel(wlege);
 end
 
 @function  [nlevels,nboxes,ltree] = pts_tree_mem_mex(src,ns,targ,nt,idivflag,ndiv,nlmin,nlmax,ifunif,iper,nlevels,nboxes,ltree)
-if nt == 0 
-    targ = zeros(3,1); 
-    # FORTRAN ptstreemem(double[3,ns] src, int[1] ns, double[3,1] targ, int[1] nt, int[1] idivflag, int[1] ndiv, int[1] nlmin, int[1] nlmax, int[1] ifunif, int[1] iper, inout int[1] nlevels, inout int[1] nboxes, inout int[1] ltree);
-else
-    # FORTRAN ptstreemem(double[3,ns] src, int[1] ns, double[3,nt] targ, int[1] nt, int[1] idivflag, int[1] ndiv, int[1] nlmin, int[1] nlmax, int[1] ifunif, int[1] iper, inout int[1] nlevels, inout int[1] nboxes, inout int[1] ltree);    
-end % is this ok?
-
+ntuse = max(nt,1);
+if nt == 0, targ = zeros(3,1); end
+# FORTRAN ptstreemem(double[3,ns] src, int[1] ns, double[3,ntuse] targ, int[1] nt, int[1] idivflag, int[1] ndiv, int[1] nlmin, int[1] nlmax, int[1] ifunif, int[1] iper, inout int[1] nlevels, inout int[1] nboxes, inout int[1] ltree);    
 end
 
 @function [itree,iptr,centers,boxsize] = pts_tree_build_mex(src,ns,targ,nt,idivflag,ndiv,nlmin,nlmax,ifunif,iper,nlevels,nboxes,ltree,itree,iptr,centers,boxsize)

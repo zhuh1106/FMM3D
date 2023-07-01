@@ -196,7 +196,12 @@
        isrcse=zeros(2,nboxes);
        isrc=zeros(nmpole,1);
        [isrc,isrcse] = pts_tree_sort_mex(nmpole,cmpole,itree,ltree,nboxes,nlevels,ipointer,treecenters,isrc,isrcse);
+%c     end of tree build
+       disp(['ltree/1e9 = ', num2str(ltree/1.0d9), ' ']);  
+       disp(['nlevels= ', num2str(nlevels), ' ']);  
 
+
+       
        keyboard
 
 

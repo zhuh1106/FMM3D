@@ -1,13 +1,14 @@
 HOST = gcc
 #HOST = gcc-openmp
 
-PROJECT = int2-laprouts3d
+PROJECT1 = int2-laprouts3d
+PROJECT2 = int2-test-lfmm3d-mps
 
 # FC - fortran compiler
 # FFLAGS - fortran compiler flags
 
 ifeq ($(HOST),gcc)
-    FC=gfortran 
+    FC=gfortran -w
     FFLAGS=-fPIC -O3 -funroll-loops -march=native -std=legacy 
 endif
 
@@ -26,8 +27,7 @@ LAP = ../../src/Laplace
 default: all laprouts3d.c mexfile
 
 
-OBJECTS = test_laprouts3d.o \
-    lfmm3d_mps0.o \
+OBJECTS = lfmm3d_mps0.o \
     pts_tree3d0.o \
     $(COM)/hkrand.o \
     $(COM)/dlaran.o \
@@ -49,7 +49,7 @@ OBJECTS = test_laprouts3d.o \
     $(LAP)/lpwrouts.o \
     $(LAP)/lndiv.o \
     $(LAP)/lwtsexp_sep1.o \
-#    $(LAP)/lfmm3d.o \
+    $(LAP)/lfmm3d.o \
 
 # mex Laplace routine for debugging
 MWRAP = ~/mwrap/mwrap
@@ -65,8 +65,10 @@ mexfile: laprouts3d.c lfmm3d_mps0.o pts_tree3d0.o $(LAP)/lpwrouts.o $(LAP)/lndiv
 #	$(MEX) laprouts3d.c lfmm3d_mps0.o pts_tree3d0.o $(LAP)/lfmm3d.o $(LAP)/lpwrouts.o $(LAP)/lndiv.o $(LAP)/lwtsexp_sep1.o $(LAP)/lapkernels.o $(LAP)/laprouts3d.o $(LAP)/l3dterms.o $(LAP)/l3dtrans.o $(COM)/fmmcommon.o $(COM)/prini.o $(COM)/yrecursion.o $(COM)/rotproj.o $(COM)/rotviarecur.o $(COM)/dfft.o $(COM)/hkrand.o $(COM)/dlaran.o $(COM)/tree_routs3d.o $(COM)/cumsum.o $(COM)/pts_tree3d.o $(COM)/rotgen.o -largeArrayDims $(MFLAGS) -lgfortran -lm -lgomp -lstdc++
 
 all: $(OBJECTS) 
-	$(FC) $(FFLAGS)  -o $(PROJECT) $(OBJECTS) 
-	./$(PROJECT)
+	$(FC) $(FFLAGS) test_laprouts3d.f -o $(PROJECT1) $(OBJECTS) 
+	$(FC) $(FFLAGS) test_lfmm3d_mps.f -o $(PROJECT2) $(OBJECTS) 
+	./$(PROJECT1)
+	./$(PROJECT2)
 
 
 # implicit rules for objects (note -o ensures writes to correct dir)
@@ -74,4 +76,4 @@ all: $(OBJECTS)
 	$(FC) -c $(FFLAGS) $< -o $@
 
 clean: 
-	rm -f $(OBJECTS) $(PROJECT) fort.13
+	rm -f $(OBJECTS) $(PROJECT1) $(PROJECT2) fort.13
