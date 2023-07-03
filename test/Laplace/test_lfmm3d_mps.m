@@ -378,7 +378,6 @@
        bigint = nboxes;
        bigint = bigint*6;
        bigint = bigint*nexptotp*nd;
-       mexp = zeros(nd,nexptotp,nboxes,6);
        list4ct=zeros(nboxes,1);
        ilist4=zeros(nboxes,1);
        for i=1:nboxes
@@ -498,7 +497,6 @@
 %cccccc STEP 2 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 %cccccc
        disp(['=== STEP 2 (merge mp) ===*']);  
-       Testval = [];
        for ilev=nlevels-1:-1:0
          for ibox = laddr(1,ilev+1):laddr(2,ilev+1)
             for i=1:8
@@ -516,7 +514,6 @@
                         cmlexpi,nterms(ilev+2),...
                         scales(ilev+1),treecenters(:,ibox),...
                         cmlexpi2,nterms(ilev+1),dc,lca);
-                    Testval = cmlexpi2(:);
                     %%% here pay attention to the variable type, is it real or complex...
                     %%% add contribution instead of overwrite
                     tmpidx = 1:2*(nd*(nterms(ilev+1)+1)*(2*nterms(ilev+1)+1));
@@ -526,9 +523,129 @@
             end
          end   
        end
+%cccccc
+%cccccc used to be insdie lfmm3dmain_mps       
+%cccccc STEP 3 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+%cccccc
+       disp(['=== STEP 3 (mp to loc+formta+mpeval) ===*']);  
+       mexp = zeros(nd,nexptotp,nboxes,6);
+ %cc   zero out mexp
+       for k=1:6
+         for i=1:nboxes
+           for j=1:nexptotp
+             for idim=1:nd
+               mexp(idim,j,i,k) = 0.0d0;
+             end
+           end
+         end
+       end           
+%c     init uall,dall,...,etc arrays
+       uall=zeros(200,nthd); dall=zeros(200,nthd); nall=zeros(120,nthd);
+       sall=zeros(120,nthd); eall=zeros(72,nthd); wall=zeros(72,nthd);
+       u1234=zeros(36,nthd); d5678=zeros(36,nthd); n1256=zeros(24,nthd);
+       s3478=zeros(24,nthd);
+       e1357=zeros(16,nthd); w2468=zeros(16,nthd); n12=zeros(20,nthd);
+       n56=zeros(20,nthd); s34=zeros(20,nthd); s78=zeros(20,nthd);
+       e13=zeros(20,nthd); e57=zeros(20,nthd); w24=zeros(20,nthd); w68=zeros(20,nthd);
+       e1=zeros(20,nthd); e3=zeros(5,nthd); e5=zeros(5,nthd); e7=zeros(5,nthd);
+       w2=zeros(5,nthd); w4=zeros(5,nthd); w6=zeros(5,nthd); w8=zeros(5,nthd);
+       iboxsubcenters=zeros(3,8,nthd);
+       iboxfl=zeros(2,8,nthd);
+%c     figure out allocations needed for iboxsrcind
+%c     and so on
+       nmaxt = 0;
+       for ibox=1:nboxes % this is not used...
+         if(nlist3(ibox)>0) 
+           istart = isrcse(1,ibox);
+           iend = isrcse(2,ibox);
+           npts = iend-istart+1;
+           if(npts>nmaxt) 
+             nmaxt = npts;
+           end
+         end
+       end
+       iboxsrcind=zeros(nmaxt,nthd);
+       iboxisort=zeros(nmaxt,nthd);
+       iboxisort_tmp=zeros(nmaxt,nthd);
+
+%!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+%! from here on is for testing purpose
+     ilev=2;
+       iboxlexp=zeros(nd*(nterms(ilev)+1)*(2*nterms(ilev)+1),8,nthd);
+       rscpow(1) = 1.0d0/boxsize(ilev+1);
+       rtmp = scales(ilev+1)/boxsize(ilev+1);
+       for i=1:nterms(ilev+1)
+         rscpow(i+1) = rscpow(i)*rtmp;
+       end
+       testval = [];
+       for ibox=laddr(1,ilev+1):laddr(2,ilev+1)
+         ithd = 0;
+         ithd = ithd + 1;
+         istart = isrcse(1,ibox); 
+         iend = isrcse(2,ibox);
+         npts = iend-istart+1;
+         if(npts>0)
+%c         rescale the multipole expansion
+           % tmp is complex, rmlexp is real, input cmlexpi needs special attention
+           rmlexpi = reshape(rmlexp(iaddr(1,ibox):(iaddr(1,ibox)+2*nd*(nterms(ilev+1)+1)*(2*nterms(ilev+1)+1)-1)),2,[]); % twice num of real ml
+           cmlexpi = reshape(rmlexpi(1,:)'+1i*rmlexpi(2,:)',nd,nterms(ilev+1)+1,2*nterms(ilev+1)+1);
+           tmpi = zeros(size(cmlexpi));
+           tmp(:,:,:,ithd) = mpscale_mex(nd,nterms(ilev+1),cmlexpi,rscpow,tmpi);
+%cc        process up down for current box
+           mexpupf = zeros(nd,nexptot); mexpdownf = zeros(nd,nexptot);
+           [mexpupf,mexpdownf] = mpoletoexp_mex(nd,tmp(:,:,:,ithd),nterms(ilev+1),nlams,nfourier,...
+                   nexptot,mexpupf,mexpdownf,rlsc);
+           mexpf1(:,:,ithd) = mexpupf; mexpf2(:,:,ithd) = mexpdownf;
+           mexp(:,:,ibox,1) = ftophys_mex(nd,mexpf1(:,:,ithd),nlams,rlams,nfourier,...
+                   nphysical,nthmax,mexp(:,:,ibox,1),fexpe,fexpo); % mexp is cumulative inside ftophys
+           mexp(:,:,ibox,2) = ftophys_mex(nd,mexpf2(:,:,ithd),nlams,rlams,nfourier,...
+                   nphysical,nthmax,mexp(:,:,ibox,2),fexpe,fexpo);
+%cc        process north-south for current box, mptmp is real... rotztoy takes in complex
+           cmptmpi = zeros(nd,(nterms(ilev+1)+1),(2*nterms(ilev+1)+1));
+           cmptmpi = rotztoy_mex(nd,nterms(ilev+1),tmp(:,:,:,ithd),cmptmpi,rdminus);
+           cmptmpi = cmptmpi(:);
+           mptmp(:,ithd) = reshape([real(cmptmpi) imag(cmptmpi)]',[],1); % probably no use
+           mexpupf = zeros(nd,nexptot); mexpdownf = zeros(nd,nexptot);
+           [mexpupf,mexpdownf] = mpoletoexp_mex(nd,cmptmpi,nterms(ilev+1),nlams,nfourier,...
+                   nexptot,mexpupf,mexpdownf,rlsc);
+           mexpf1(:,:,ithd) = mexpupf; mexpf2(:,:,ithd) = mexpdownf;
+           mexp(:,:,ibox,3) = ftophys_mex(nd,mexpf1(:,:,ithd),nlams,rlams,nfourier,...
+                   nphysical,nthmax,mexp(:,:,ibox,3),fexpe,fexpo);
+           mexp(:,:,ibox,4) = ftophys_mex(nd,mexpf2(:,:,ithd),nlams,rlams,nfourier,...
+                   nphysical,nthmax,mexp(:,:,ibox,4),fexpe,fexpo);
+%cc        process east-west for current box  
+           cmptmpi = zeros(nd,(nterms(ilev+1)+1),(2*nterms(ilev+1)+1));
+           cmptmpi = rotztox_mex(nd,nterms(ilev+1),tmp(:,:,:,ithd),cmptmpi,rdplus);
+           cmptmpi = cmptmpi(:);
+           mptmp(:,ithd) = reshape([real(cmptmpi) imag(cmptmpi)]',[],1);
+           mexpupf = zeros(nd,nexptot); mexpdownf = zeros(nd,nexptot);
+           [mexpupf,mexpdownf] = mpoletoexp_mex(nd,cmptmpi,nterms(ilev+1),nlams,nfourier,...
+                   nexptot,mexpupf,mexpdownf,rlsc);
+           mexpf1(:,:,ithd) = mexpupf; mexpf2(:,:,ithd) = mexpdownf;
+           mexp(:,:,ibox,5) = ftophys_mex(nd,mexpf1(:,:,ithd),nlams,rlams,nfourier,...
+                   nphysical,nthmax,mexp(:,:,ibox,5),fexpe,fexpo);
+           mexp(:,:,ibox,6) = ftophys_mex(nd,mexpf2(:,:,ithd),nlams,rlams,nfourier,...
+                   nphysical,nthmax,mexp(:,:,ibox,6),fexpe,fexpo);
+         end
+       end
+
 %        rmlexp_f=importdata('mps_data.dat');
 
        keyboard
+%    boxsize(0:nlevels)
+%    nterms(0:nlevels)
+%    scales(0:nlevels)
+%    laddr(2,0:nlevels)
+%    rscpow(0:nmax)
+%    dc(0:4*nmax,0:4*nmax)
+%    rdplus(0:nmax,0:nmax,-nmax:nmax)
+%    rdminus(0:nmax,0:nmax,-nmax:nmax)
+%    rdsq3(0:nmax,0:nmax,-nmax:nmax)
+%    rdmsq3(0:nmax,0:nmax,-nmax:nmax)
+%    rlsc(0:nmax,0:nmax,nlams)
+%    tmp(nd,0:nmax,-nmax:nmax,nthd)
+%
+
 
 %%%%%% post process       
        interms = (mterms(1)+1)*(2*mterms(1)+1);

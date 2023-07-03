@@ -573,7 +573,7 @@ c      Initialize routines for plane wave mp loc translation
        allocate(rdsq3(0:nmax,0:nmax,-nmax:nmax))
        allocate(rdmsq3(0:nmax,0:nmax,-nmax:nmax))
        allocate(rlsc(0:nmax,0:nmax,nlams))
-c      generate rotation matrices and carray
+c      generate rotation matrices and carray (rdminus was not initialized to 0?)
        call getpwrotmat(nmax,carray,rdplus,rdminus,rdsq3,rdmsq3,dc)
 c      generate rlams and weights (these are the nodes
 c      and weights for the lambda integral)
@@ -927,6 +927,109 @@ c      and so on
        allocate(iboxsrcind(nmaxt,nthd))
        allocate(iboxisort(nmaxt,nthd))
        allocate(iboxisort_tmp(nmaxt,nthd))
+
+      !  open(1, file = 'mps_data.dat')
+      !  do j=-nmax,nmax  
+      !    do i=0,nmax
+      !      do k=0,nmax
+      !        write(1,*) rdminus(k,i,j)
+      !      enddo
+      !    end do  
+      !  enddo
+      ! close(1)        
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! from here on is for testing purpose
+       ilev=2
+         allocate(iboxlexp(nd*(nterms(ilev)+1)*
+     1            (2*nterms(ilev)+1),8,nthd))
+
+         rscpow(0) = 1.0d0/boxsize(ilev)
+         rtmp = scales(ilev)/boxsize(ilev)
+         do i=1,nterms(ilev)
+            rscpow(i) = rscpow(i-1)*rtmp
+         enddo
+         do ibox=laddr(1,ilev),laddr(2,ilev)
+            ithd = 0
+C$          ithd=omp_get_thread_num()
+            ithd = ithd + 1
+            istart = isrcse(1,ibox) 
+            iend = isrcse(2,ibox)
+            npts = iend-istart+1
+            if(npts.gt.0) then
+c            rescale the multipole expansion
+                call mpscale(nd,nterms(ilev),rmlexp(iaddr(1,ibox)),
+     1                 rscpow,tmp(1,0,-nmax,ithd))
+cc                process up down for current box
+                call mpoletoexp(nd,tmp(1,0,-nmax,ithd),nterms(ilev),
+     1              nlams,nfourier,
+     2              nexptot,mexpf1(1,1,ithd),mexpf2(1,1,ithd),rlsc)
+                call ftophys(nd,mexpf1(1,1,ithd),nlams,rlams,nfourier,
+     1          nphysical,nthmax,mexp(1,1,ibox,1),fexpe,fexpo)
+                call ftophys(nd,mexpf2(1,1,ithd),nlams,rlams,nfourier,
+     1          nphysical,nthmax,mexp(1,1,ibox,2),fexpe,fexpo)
+cc                process north-south for current box
+                call rotztoy(nd,nterms(ilev),tmp(1,0,-nmax,ithd),
+     1              mptmp(1,ithd),rdminus)
+                call mpoletoexp(nd,mptmp(1,ithd),nterms(ilev),
+     1              nlams,nfourier,
+     2              nexptot,mexpf1(1,1,ithd),mexpf2(1,1,ithd),rlsc)
+                call ftophys(nd,mexpf1(1,1,ithd),nlams,rlams,nfourier,
+     1          nphysical,nthmax,mexp(1,1,ibox,3),fexpe,fexpo)
+                call ftophys(nd,mexpf2(1,1,ithd),nlams,rlams,nfourier,
+     1          nphysical,nthmax,mexp(1,1,ibox,4),fexpe,fexpo)
+cc                process east-west for current box
+                call rotztox(nd,nterms(ilev),tmp(1,0,-nmax,ithd),
+     1              mptmp(1,ithd),rdplus)
+                call mpoletoexp(nd,mptmp(1,ithd),
+     1              nterms(ilev),nlams,nfourier,
+     2              nexptot,mexpf1(1,1,ithd),
+     3              mexpf2(1,1,ithd),rlsc)
+                call ftophys(nd,mexpf1(1,1,ithd),nlams,rlams,nfourier,
+     1          nphysical,nthmax,mexp(1,1,ibox,5),fexpe,fexpo)
+                call ftophys(nd,mexpf2(1,1,ithd),nlams,rlams,nfourier,
+     1          nphysical,nthmax,mexp(1,1,ibox,6),fexpe,fexpo)
+
+                ! if (ibox.eq.11) then
+                !   print *, "nterms : ", nterms(ilev)
+                !   open(1, file = 'mps_data.dat')
+                !   do j=-nmax,nmax  
+                !   do i=0,39
+                !       write(1,*) imag(tmp(1,i,j,ithd))
+                !   end do  
+                !   enddo
+                !   close(1)        
+                ! endif
+                
+            endif
+         enddo  
+         deallocate(iboxlexp)
+         
+        !  if (ibox.eq.11) then
+        !   ! print *, "nterms : ", nterms(ilev)
+        !   ! print *, "tmp: ", tmp
+        !   print *, "mptmp: ", mptmp(:,ithd)
+          ! open(1, file = 'mps_data.dat')
+          ! do i=1,lmptemp
+          !     write(1,*) mptmp(i,ithd)
+          ! end do  
+          ! close(1)        
+        ! endif
+
+          open(1, file = 'mps_data.dat')
+          do k=1,6
+          do j=1,nboxes  
+          do i=1,nexptotp
+              write(1,*) imag(mexp(1,i,j,k))
+          end do  
+          enddo
+          enddo
+          close(1)        
+
+! this is the end of test code part, check mexp(:,:,:,1:6)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
        do ilev=2,nlevels
          allocate(iboxlexp(nd*(nterms(ilev)+1)*
      1            (2*nterms(ilev)+1),8,nthd))

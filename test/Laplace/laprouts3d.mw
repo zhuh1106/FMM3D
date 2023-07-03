@@ -267,3 +267,56 @@ end
 nn = numel(fexpe);
 # FORTRAN mkfexp(int[1] nlambs, int[nlambs] numfour, int[nlambs] numphys, inout dcomplex[nn] fexpe, inout dcomplex[nn] fexpo, inout dcomplex[nn] fexpback);
 end
+
+@function mpoleout = mpscale_mex(nd,nterms,mpolein,rsc,mpoleout)
+nterms1 = nterms+1;
+ndnterms = nd*(nterms+1);
+ntermst2p1 = 2*nterms+1;
+mpolein = reshape(mpolein,ndnterms,ntermst2p1);
+mpoleout = reshape(mpoleout,ndnterms,ntermst2p1);
+# FORTRAN mpscale(int[1] nd, int[1] nterms, dcomplex[ndnterms,ntermst2p1] mpolein, double[nterms1] rsc, inout dcomplex[ndnterms,ntermst2p1] mpoleout);
+mpoleout = reshape(mpoleout,nd,nterms+1,2*nterms+1);
+end
+
+@function [mexpupf,mexpdownf] = mpoletoexp_mex(nd,mpole,nterms,nlambs,numtets,nexptot,mexpupf,mexpdownf,rlsc)
+ndnterms = nd*(nterms+1);
+ntermst2p1 = 2*nterms+1;
+mpole = reshape(mpole,ndnterms,ntermst2p1);
+nterms1 = nterms+1;
+nterms1s = nterms1^2;
+rlsc = reshape(rlsc,nterms1s,nlambs);
+# FORTRAN mpoletoexp(int[1] nd, dcomplex[ndnterms,ntermst2p1] mpole, int[1] nterms, int[1] nlambs, int[nlambs] numtets, int[1] nexptot, inout dcomplex[nd,nexptot] mexpupf, inout dcomplex[nd,nexptot] mexpdownf, double[nterms1s,nlambs] rlsc);
+end
+
+@function mexpphys = ftophys_mex(nd,mexpf,nlambs,rlams,numfour,numphys,nthmax,mexpphys,fexpe,fexpo)
+nexptot = size(mexpf,2);
+nn = numel(fexpe);
+nexptotp = size(mexpphys,2);
+# FORTRAN ftophys(int[1] nd, dcomplex[nd,nexptot] mexpf, int[1] nlambs, double[nlambs] rlams, int[nlambs] numfour, int[nlambs] numphys, int[1] nthmax, inout dcomplex[nd,nexptotp] mexpphys, dcomplex[nn] fexpe, dcomplex[nn] fexpo);
+end
+
+@function mrotate = rotztoy_mex(nd,nterms,mpole,mrotate,rdminus)
+ndnterms = nd*(nterms+1);
+ntermst2p1 = 2*nterms+1;
+mpole = reshape(mpole,ndnterms,ntermst2p1);
+mrotate = reshape(mrotate,ndnterms,ntermst2p1);
+nterms1 = nterms+1;
+nterms1s = nterms1^2;
+nterms2p1 = nterms*2+1; 
+rdminus = reshape(rdminus,nterms1s,nterms2p1);
+# FORTRAN rotztoy(int[1] nd, int[1] nterms, dcomplex[ndnterms,ntermst2p1] mpole, inout dcomplex[ndnterms,ntermst2p1] mrotate, double[nterms1s,nterms2p1] rdminus);
+mrotate = reshape(mrotate,nd,nterms+1,2*nterms+1);
+end
+
+@function mrotate = rotztox_mex(nd,nterms,mpole,mrotate,rdplus)
+ndnterms = nd*(nterms+1);
+ntermst2p1 = 2*nterms+1;
+mpole = reshape(mpole,ndnterms,ntermst2p1);
+mrotate = reshape(mrotate,ndnterms,ntermst2p1);
+nterms1 = nterms+1;
+nterms1s = nterms1^2;
+nterms2p1 = nterms*2+1; 
+rdplus = reshape(rdplus,nterms1s,nterms2p1);
+# FORTRAN rotztox(int[1] nd, int[1] nterms, dcomplex[ndnterms,ntermst2p1] mpole, inout dcomplex[ndnterms,ntermst2p1] mrotate, double[nterms1s,nterms2p1] rdplus);
+mrotate = reshape(mrotate,nd,nterms+1,2*nterms+1);
+end
