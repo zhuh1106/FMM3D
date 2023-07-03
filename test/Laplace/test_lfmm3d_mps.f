@@ -820,6 +820,7 @@ cccccc
 C$       time1=omp_get_wtime()
 c       step 1, shift incoming multipole expansion to the center
 c       of each leaf-node box
+       print *, "size of rmlexp : ", size(rmlexp)
        do ilev=2,nlevels
          do ibox=laddr(1,ilev),laddr(2,ilev)
            istart = isrcse(1,ibox)
@@ -828,10 +829,13 @@ c       of each leaf-node box
            nchild = itree(ipointer(4)+ibox-1)
            if(npts.gt.0.and.nchild.eq.0.and.list4ct(ibox).eq.0) then
              do i = istart,iend
+               ! rmlexp is defined as real but is treated as complex inside l3dmpmp
                call l3dmpmp(nd,rmpolesort(i),cmpolesort(1,i),
      1              mpolesort(impolesort(i)),mtermssort(i),
      2              scales(ilev),treecenters(1,ibox),
      3              rmlexp(iaddr(1,ibox)),nterms(ilev),dc,lca)
+               if (ilev.eq.2.and.ibox.eq.10.and.i.eq.1) then
+               endif
              enddo
            endif
          enddo         

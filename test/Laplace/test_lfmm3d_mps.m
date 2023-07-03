@@ -1,6 +1,21 @@
 % test lfmm3d_mps
 %
 %
+% variables that need special attention on index...
+%    boxsize(0:nlevels)
+%    nterms(0:nlevels)
+%    scales(0:nlevels)
+%    laddr(2,0:nlevels)
+%    rscpow(0:nmax)
+%    dc(0:4*nmax,0:4*nmax)
+%    rdplus(0:nmax,0:nmax,-nmax:nmax)
+%    rdminus(0:nmax,0:nmax,-nmax:nmax)
+%    rdsq3(0:nmax,0:nmax,-nmax:nmax)
+%    rdmsq3(0:nmax,0:nmax,-nmax:nmax)
+%    rlsc(0:nmax,0:nmax,nlams)
+%    tmp(nd,0:nmax,-nmax:nmax,nthd)
+%
+
        clear
        addpath('../../matlab/')
        dc = zeros(51,51);
@@ -204,9 +219,9 @@
        nterms=zeros(nlevels+1,1);
 %c     Compute length of expansions at each level
        nmax = 0;
-       for i=1:nlevels+1
-         nterms(i) = l3dterms_mex(eps,nterms(i));
-         if(nterms(i)>nmax), nmax = nterms(i); end
+       for i=0:nlevels
+         nterms(i+1) = l3dterms_mex(eps,nterms(i+1));
+         if(nterms(i+1)>nmax), nmax = nterms(i+1); end
        end     
 %      Multipole and local expansions will be held in workspace in locations pointed to by array iaddr(2,nboxes).
 %      iaddr is pointer to iaddr array, itself contained in workspace.
@@ -251,15 +266,17 @@
 %      ~line 467
        itreetmp = reshape(itree(ipointer(1):ipointer(1)+2*(nlevels+1)-1),2,nlevels+1);
        lmptot = 0;
+       % inside mpalloc, (laddr(2,i)-laddr(1,i)+1)*2*nn, for real mlexp rmlexp ?
        [iaddr,lmptot] = mpalloc_mex(nd,itreetmp,iaddr,nlevels,lmptot,nterms,nboxes);
        disp(['lmptot/1.0d9 = ', num2str(lmptot/1.0d9), ' ']);  
        rmlexp=zeros(lmptot,1);
+%        rmlexp=ones(lmptot,1);
        localsort=zeros(lmpole,1);
 %c     Memory allocation is complete.
 %c     scaling factor for multipole and local expansions at all levels
        scales=zeros(nlevels+1);
-       for ilev = 1:nlevels+1
-         scales(ilev) = boxsize(ilev);
+       for ilev = 0:nlevels
+         scales(ilev+1) = boxsize(ilev+1);
        end
        laddr = reshape(itree(ipointer(1):(ipointer(1)+2*(nlevels+1)-1)),2,nlevels+1);
 %c     Call main fmm_mps routine
@@ -310,8 +327,8 @@
        rlams=zeros(nlams,1); whts=zeros(nlams,1);
        nphysical=zeros(nlams,1); nfourier=zeros(nlams,1);
        nmax = 0;
-       for i=1:nlevels
-         if(nmax<nterms(i)), nmax = nterms(i); end
+       for i=0:nlevels
+         if(nmax<nterms(i+1)), nmax = nterms(i+1); end
        end
        rscpow=zeros(nmax+1,1);
        carray=zeros(4*nmax+1,4*nmax+1);
@@ -376,11 +393,14 @@
 %c     fourier to physical domain
        [fexpe,fexpo,fexpback] = mkfexp_mex(nlams,nfourier,nphysical,fexpe,fexpo,fexpback);
 %c     set all multipole and local expansions to zero
-       for ilev = 1:nlevels
-         for ibox=laddr(1,ilev):laddr(2,ilev)
-           tmpidx = 1:(nd*(nterms(ilev)+1)*(2*nterms(ilev)+1));
-           rmlexp(iaddr(1,ibox)-1+tmpidx) = mpzero_mex(nd,rmlexp(iaddr(1,ibox)-1+tmpidx),nterms(ilev));
-           rmlexp(iaddr(2,ibox)-1+tmpidx) = mpzero_mex(nd,rmlexp(iaddr(2,ibox)-1+tmpidx),nterms(ilev));
+       for ilev = 0:nlevels
+         for ibox=laddr(1,ilev+1):laddr(2,ilev+1) % laddr(2,0:nlevels)
+           mpoleiboxtmp = zeros(nd*(nterms(ilev+1)+1)*(2*nterms(ilev+1)+1),1);
+           mpoleiboxtmp = mpzero_mex(nd,mpoleiboxtmp,nterms(ilev+1));
+           mpoleiboxtmp = reshape([real(mpoleiboxtmp(:)),imag(mpoleiboxtmp(:))]',[],1);
+           tmpidx = 1:2*(nd*(nterms(ilev+1)+1)*(2*nterms(ilev+1)+1));
+           rmlexp(iaddr(1,ibox)-1+tmpidx) = mpoleiboxtmp;
+           rmlexp(iaddr(2,ibox)-1+tmpidx) = mpoleiboxtmp;
          end      
        end
 %c     initialize legendre function evaluation routines
@@ -398,7 +418,7 @@
        lca = 4*nmax;
        disp(['=== STEP 0 list4===*']);  
        for ilev=1:nlevels-1
-         for ibox=laddr(1,ilev):laddr(2,ilev)
+         for ibox=laddr(1,ilev+1):laddr(2,ilev+1)
            if(nlist3(ibox)>0) 
              cntlist4=cntlist4+1;
              list4ct(ibox)=cntlist4;
@@ -408,7 +428,7 @@
        end    
        disp(['nboxes: ', num2str(nboxes), ', cntlist4: ', num2str(cntlist4)]);  
        pgboxwexp=zeros(nd,nexptotp,cntlist4,6);
-       gboxmexp=zeros(nd*(nterms(nlevels)+1)*(2*nterms(nlevels)+1),8,cntlist4);
+       gboxmexp=zeros(nd*(nterms(nlevels+1)+1)*(2*nterms(nlevels+1)+1),8,cntlist4);
        gboxsubcenters=zeros(3,8,nthd);
        gboxfl=zeros(2,8,nthd);
        nmaxt = 0;
@@ -430,10 +450,10 @@
 %      pgboxwexp=0d0; gboxmexp=0d0;
 %c     form mexp for all list4 type box at first ghost box center
        for ilev=1:nlevels-1
-         rscpow(1) = 1.0d0/boxsize(ilev+1); % only used inside if(list4ct(ibox)>0)
-         rtmp = scales(ilev+1)/boxsize(ilev+1);
-         for i=1:nterms(ilev+1), rscpow(i+1) = rscpow(i)*rtmp; end
-         for ibox=laddr(1,ilev),laddr(2,ilev)
+         rscpow(1) = 1.0d0/boxsize(ilev+2); % only used inside if(list4ct(ibox)>0)
+         rtmp = scales(ilev+2)/boxsize(ilev+2);
+         for i=1:nterms(ilev+2), rscpow(i+1) = rscpow(i)*rtmp; end
+         for ibox=laddr(1,ilev+1),laddr(2,ilev+1)
             ithd = 0; ithd = ithd + 1;
             if(list4ct(ibox)>0)
               istart=isrcse(1,ibox); iend=isrcse(2,ibox); npts = iend-istart+1;
@@ -449,6 +469,31 @@
 %cccccc STEP 1 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 %cccccc
        disp(['=== STEP 1 (shift mp) ===*']);     
+%c     step 1, shift incoming multipole expansion to the center
+%c     of each leaf-node box
+       test = 0;
+       for ilev=2:nlevels
+         for ibox=laddr(1,ilev+1):laddr(2,ilev+1)
+           istart = isrcse(1,ibox);
+           iend = isrcse(2,ibox);
+           npts = iend-istart+1;
+           nchild = itree(ipointer(4)+ibox-1);
+           if((npts>0)&&(nchild==0)&&(list4ct(ibox)==0))
+             for i = istart:iend
+               rmlexpi = zeros(nd,nterms(ilev+1)+1,2*nterms(ilev+1)+1);
+               rmlexpi = l3dmpmp_mex(nd,rmpolesort(i),cmpolesort(:,i),...
+                   mpolesort(impolesort(i):(impolesort(i)+nd*(mtermssort(i)+1)*(2*mtermssort(i)+1)-1)),mtermssort(i),...
+                   scales(ilev+1),treecenters(:,ibox),...
+                   rmlexpi,nterms(ilev+1),dc,lca); % be careful with scales, nterms
+               %%% here pay attention to the variable type, is it real or complex...
+               tmpidx = 1:2*(nd*(nterms(ilev+1)+1)*(2*nterms(ilev+1)+1));
+               rmlexp(iaddr(1,ibox)-1+tmpidx) = reshape([real(rmlexpi(:)),imag(rmlexpi(:))]',[],1);
+             end
+           end
+         end         
+       end      
+
+
 
        keyboard
 
