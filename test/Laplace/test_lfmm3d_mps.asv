@@ -396,7 +396,7 @@
 %cccccc
 %c      count number of boxes are in list4
        lca = 4*nmax;
-       disp(['=== STEP 0 list4===*']);  
+       disp(['=== STEP 0 list4===']);  
        for ilev=1:nlevels-1
          for ibox=laddr(1,ilev):laddr(2,ilev)
            if(nlist3(ibox)>0) 
@@ -448,7 +448,8 @@
 %cccccc used to be insdie lfmm3dmain_mps       
 %cccccc STEP 1 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 %cccccc
-       disp(['=== STEP 1 (shift mp) ===*']);     
+       if(ifprint .ge. 1)
+     $   call prinf('=== STEP 1 (shift mp) ====*',i,0)       
 
        keyboard
 

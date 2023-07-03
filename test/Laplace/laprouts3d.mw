@@ -192,3 +192,78 @@ end
 @function [ixy,ixyse] = pts_tree_sort_mex(n,xys,itree,ltree,nboxes,nlevels,iptr,centers,ixy,ixyse)
 # FORTRAN ptstreesort(int[1] n, double[3,n] xys, int[ltree] itree, int[1] ltree, int[1] nboxes, int[1] nlevels, int[8] iptr, double[3,nboxes] centers, inout int[n] ixy, inout int[2,nboxes] ixyse);
 end
+
+@function nterms = l3dterms_mex(eps, nterms)
+# FORTRAN l3dterms(double[1] eps, inout int[1] nterms);
+end
+
+@function arrsort = dreorderf_mex(ndim,n,arr,arrsort,iarr)
+len = numel(arr(1,:));
+# FORTRAN dreorderf(int[1] ndim, int[1] n, double[ndim,len] arr, inout double[ndim,len] arrsort, int[len] iarr);
+end
+
+@function arrsort = ireorderf_mex(ndim,n,arr,arrsort,iarr)
+len = numel(arr(1,:));
+# FORTRAN ireorderf(int[1] ndim, int[1] n, int[ndim,len] arr, inout int[ndim,len] arrsort, int[len] iarr);
+end
+
+@function [iaddr,lmptot] = mpalloc_mex(nd,laddr,iaddr,nlevels,lmptot,nterms,nboxes)
+% one additional imput?
+nlevels1 = nlevels+1;
+# FORTRAN mpalloc0(int[1] nd, int[2,nlevels1] laddr, inout int[2,nboxes] iaddr, int[1] nlevels, inout int[1] lmptot, int[nlevels1] nterms, int[1] nboxes);
+end
+
+@function [mnlist1,mnlist2,mnlist3,mnlist4] = computemnlists_mex(nlevels,nboxes,laddr,boxsize,centers,iparent,nchild,ichild,isep,nnbors,mnbors,nbors,iper,mnlist1,mnlist2,mnlist3,mnlist4)
+nlevels1 = nlevels+1;
+# FORTRAN computemnlists(int[1] nlevels, int[1] nboxes, int[2,nlevels1] laddr, double[nlevels1] boxsize, double[3,nboxes] centers, int[nboxes] iparent, int[nboxes] nchild, int[8,nboxes] ichild, int[1] isep, int[nboxes] nnbors, int[1] mnbors, int[mnbors,nboxes] nbors, int[1] iper, inout int[1] mnlist1, inout int[1] mnlist2, inout int[1] mnlist3, inout int[1] mnlist4);
+end
+
+@function [nlist1,list1,nlist2,list2,nlist3,list3,nlist4,list4]=computelists_mex(nlevels,nboxes,laddr,boxsize,centers,iparent,nchild,ichild,isep,nnbors,mnbors,nbors,iper,nlist1,mnlist1,list1,nlist2,mnlist2,list2,nlist3,mnlist3,list3,nlist4,mnlist4,list4)
+nlevels1 = nlevels+1;
+# FORTRAN computelists(int[1] nlevels, int[1] nboxes, int[2,nlevels1] laddr, double[nlevels1] boxsize, double[3,nboxes] centers, int[nboxes] iparent, int[nboxes] nchild, int[8,nboxes] ichild, int[1] isep, int[nboxes] nnbors, int[1] mnbors, int[mnbors,nboxes] nbors, int[1] iper, inout int[nboxes] nlist1, int[1] mnlist1, inout int[mnlist1,nboxes] list1, inout int[nboxes] nlist2, int[1] mnlist2, inout int[mnlist2,nboxes] list2, inout int[nboxes] nlist3, int[1] mnlist3, inout int[mnlist3,nboxes] list3, inout int[nboxes] nlist4, int[1] mnlist4, inout int[mnlist4,nboxes] list4);
+end
+
+@function [carray,rdpi2,rdmpi2,rdsq3,rdmsq3,dc] = getpwrotmat_mex(nterms,carray,rdpi2,rdmpi2,rdsq3,rdmsq3,dc)
+nterms4p1 = 4*nterms+1;
+nterms1 = nterms+1;
+nterms1s = nterms1^2;
+nterms2p1 = nterms*2+1;
+rdpi2 = reshape(rdpi2,nterms1s,nterms2p1);
+rdmpi2 = reshape(rdmpi2,nterms1s,nterms2p1);
+rdsq3 = reshape(rdsq3,nterms1s,nterms2p1);
+rdmsq3 = reshape(rdmsq3,nterms1s,nterms2p1);
+# FORTRAN getpwrotmat(int[1] nterms, inout double[nterms4p1,nterms4p1] carray, inout double[nterms1s,nterms2p1] rdpi2, inout double[nterms1s,nterms2p1] rdmpi2, inout double[nterms1s,nterms2p1] rdsq3, inout double[nterms1s,nterms2p1] rdmsq3, inout double[nterms4p1,nterms4p1] dc);
+rdpi2 = reshape(rdpi2,nterms1,nterms1,nterms2p1);
+rdmpi2 = reshape(rdmpi2,nterms1,nterms1,nterms2p1);
+rdsq3 = reshape(rdsq3,nterms1,nterms1,nterms2p1);
+rdmsq3 = reshape(rdmsq3,nterms1,nterms1,nterms2p1);
+end
+
+@function [x,w] = vwts_mex(x,w,n)
+# FORTRAN vwts(inout double[n] x, inout double[n] w, int[1] n);
+end
+
+@function numtets = numthetahalf_mex(numtets,nlams)
+# FORTRAN numthetahalf(inout int[nlams] numtets, int[1] nlams);
+end
+
+@function numtets = numthetafour_mex(numtets,nlams)
+# FORTRAN numthetafour(inout int[nlams] numtets, int[1] nlams);
+end
+
+@function rlsc = rlscini_mex(rlsc,nlambs,rlams,nterms)
+nterms1 = nterms+1;
+nterms1s = nterms1^2;
+rlsc = reshape(rlsc,nterms1s,nlambs);
+# FORTRAN rlscini(inout double[nterms1s,nlambs] rlsc, int[1] nlambs, double[nlambs] rlams, int[1] nterms);
+rlsc = reshape(rlsc,nterms1,nterms1,nlambs);
+end
+
+@function [xs,ys,zs] = mkexps_mex(rlams,nlambs,numphys,nexptotp,xs,ys,zs)
+# FORTRAN mkexps(double[nlambs] rlams, int[1] nlambs, int[nlambs] numphys, int[1] nexptotp, inout dcomplex[11,nexptotp] xs, inout dcomplex[11,nexptotp] ys, inout dcomplex[5,nexptotp] zs);
+end
+
+@function [fexpe,fexpo,fexpback] = mkfexp_mex(nlambs,numfour,numphys,fexpe,fexpo,fexpback)
+nn = numel(fexpe);
+# FORTRAN mkfexp(int[1] nlambs, int[nlambs] numfour, int[nlambs] numphys, inout dcomplex[nn] fexpe, inout dcomplex[nn] fexpo, inout dcomplex[nn] fexpback);
+end
