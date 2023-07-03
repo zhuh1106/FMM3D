@@ -480,20 +480,53 @@
            nchild = itree(ipointer(4)+ibox-1);
            if((npts>0)&&(nchild==0)&&(list4ct(ibox)==0))
              for i = istart:iend
-               rmlexpi = zeros(nd,nterms(ilev+1)+1,2*nterms(ilev+1)+1);
-               rmlexpi = l3dmpmp_mex(nd,rmpolesort(i),cmpolesort(:,i),...
+               cmlexpi = zeros(nd,nterms(ilev+1)+1,2*nterms(ilev+1)+1);
+               cmlexpi = l3dmpmp_mex(nd,rmpolesort(i),cmpolesort(:,i),...
                    mpolesort(impolesort(i):(impolesort(i)+nd*(mtermssort(i)+1)*(2*mtermssort(i)+1)-1)),mtermssort(i),...
                    scales(ilev+1),treecenters(:,ibox),...
-                   rmlexpi,nterms(ilev+1),dc,lca); % be careful with scales, nterms
+                   cmlexpi,nterms(ilev+1),dc,lca); % be careful with scales, nterms
                %%% here pay attention to the variable type, is it real or complex...
                tmpidx = 1:2*(nd*(nterms(ilev+1)+1)*(2*nterms(ilev+1)+1));
-               rmlexp(iaddr(1,ibox)-1+tmpidx) = reshape([real(rmlexpi(:)),imag(rmlexpi(:))]',[],1);
+               rmlexp(iaddr(1,ibox)-1+tmpidx) = reshape([real(cmlexpi(:)),imag(cmlexpi(:))]',[],1);
              end
            end
          end         
-       end      
-
-
+       end    
+%        rmlexp_f=importdata('mps_data.dat');
+%cccccc
+%cccccc used to be insdie lfmm3dmain_mps       
+%cccccc STEP 2 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+%cccccc
+       disp(['=== STEP 2 (merge mp) ===*']);  
+       Testval = [];
+       for ilev=nlevels-1:-1:0
+         for ibox = laddr(1,ilev+1):laddr(2,ilev+1)
+            for i=1:8
+               jbox = itree(ipointer(5)+8*(ibox-1)+i-1);
+               if(jbox>0) 
+                  istart = isrcse(1,jbox);
+                  iend = isrcse(2,jbox);
+                  npts = iend-istart+1;
+                  if(npts>0) 
+                    %%% input cmlexpi needs special attention
+                    rmlexpi = reshape(rmlexp(iaddr(1,jbox):(iaddr(1,jbox)+2*nd*(nterms(ilev+2)+1)*(2*nterms(ilev+2)+1)-1)),2,[]); % twice num of real ml
+                    cmlexpi = reshape(rmlexpi(1,:)'+1i*rmlexpi(2,:)',nd,nterms(ilev+2)+1,2*nterms(ilev+2)+1);
+                    cmlexpi2 = zeros(nd,nterms(ilev+1)+1,2*nterms(ilev+1)+1);
+                    cmlexpi2 = l3dmpmp_mex(nd,scales(ilev+2),treecenters(:,jbox),...
+                        cmlexpi,nterms(ilev+2),...
+                        scales(ilev+1),treecenters(:,ibox),...
+                        cmlexpi2,nterms(ilev+1),dc,lca);
+                    Testval = cmlexpi2(:);
+                    %%% here pay attention to the variable type, is it real or complex...
+                    %%% add contribution instead of overwrite
+                    tmpidx = 1:2*(nd*(nterms(ilev+1)+1)*(2*nterms(ilev+1)+1));
+                    rmlexp(iaddr(1,ibox)-1+tmpidx) = rmlexp(iaddr(1,ibox)-1+tmpidx) + reshape([real(cmlexpi2(:)),imag(cmlexpi2(:))]',[],1);
+                  end
+               end
+            end
+         end   
+       end
+%        rmlexp_f=importdata('mps_data.dat');
 
        keyboard
 

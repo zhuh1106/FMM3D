@@ -834,8 +834,6 @@ c       of each leaf-node box
      1              mpolesort(impolesort(i)),mtermssort(i),
      2              scales(ilev),treecenters(1,ibox),
      3              rmlexp(iaddr(1,ibox)),nterms(ilev),dc,lca)
-               if (ilev.eq.2.and.ibox.eq.10.and.i.eq.1) then
-               endif
              enddo
            endif
          enddo         
@@ -843,6 +841,13 @@ c       of each leaf-node box
        call cpu_time(time2)
 C$     time2=omp_get_wtime()
        timeinfo(1)=time2-time1
+      !  output data into a file 
+      !  open(1, file = 'mps_data.dat', status = 'new')  
+      !  open(1, file = 'mps_data.dat')  
+      !  do i=1,size(rmlexp)
+      !     write(1,*) rmlexp(i)
+      !  end do  
+      !  close(1)    
 cccccc
 cccccc used to be insdie lfmm3dmain_mps       
 cccccc STEP 2 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
@@ -871,7 +876,12 @@ C$     time1=omp_get_wtime()
        enddo
        call cpu_time(time2)
 C$     time2=omp_get_wtime()
-       timeinfo(2)=time2-time1
+      !  timeinfo(2)=time2-time1
+      !  open(1, file = 'mps_data.dat')  
+      !  do i=1,size(rmlexp)
+      !     write(1,*) rmlexp(i)
+      !  end do  
+      !  close(1)        
 cccccc
 cccccc used to be insdie lfmm3dmain_mps       
 cccccc STEP 3 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
