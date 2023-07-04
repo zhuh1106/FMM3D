@@ -540,14 +540,14 @@
          end
        end           
 %c     init uall,dall,...,etc arrays
-       uall=zeros(200,nthd); dall=zeros(200,nthd); nall=zeros(120,nthd);
-       sall=zeros(120,nthd); eall=zeros(72,nthd); wall=zeros(72,nthd);
-       u1234=zeros(36,nthd); d5678=zeros(36,nthd); n1256=zeros(24,nthd);
-       s3478=zeros(24,nthd);
-       e1357=zeros(16,nthd); w2468=zeros(16,nthd); n12=zeros(20,nthd);
-       n56=zeros(20,nthd); s34=zeros(20,nthd); s78=zeros(20,nthd);
+       uall=zeros(200,nthd); dall=zeros(200,nthd); nall=zeros(120,nthd); sall=zeros(120,nthd);
+       eall=zeros(72,nthd); wall=zeros(72,nthd);
+       u1234=zeros(36,nthd); d5678=zeros(36,nthd); 
+       n1256=zeros(24,nthd); s3478=zeros(24,nthd);
+       e1357=zeros(16,nthd); w2468=zeros(16,nthd); 
+       n12=zeros(20,nthd); n56=zeros(20,nthd); s34=zeros(20,nthd); s78=zeros(20,nthd);
        e13=zeros(20,nthd); e57=zeros(20,nthd); w24=zeros(20,nthd); w68=zeros(20,nthd);
-       e1=zeros(20,nthd); e3=zeros(5,nthd); e5=zeros(5,nthd); e7=zeros(5,nthd);
+       e1=zeros(5,nthd); e3=zeros(5,nthd); e5=zeros(5,nthd); e7=zeros(5,nthd);
        w2=zeros(5,nthd); w4=zeros(5,nthd); w6=zeros(5,nthd); w8=zeros(5,nthd);
        iboxsubcenters=zeros(3,8,nthd);
        iboxfl=zeros(2,8,nthd);
@@ -628,10 +628,64 @@
                    nphysical,nthmax,mexp(:,:,ibox,6),fexpe,fexpo);
          end
        end
-
 %        rmlexp_f=importdata('mps_data.dat');
 
+       nuall=0; ndall=0; nnall=0; nsall=0; neall=0; nwall=0; 
+       nu1234=0; nd5678=0; nn1256=0; ns3478=0; ne1357=0; nw2468=0; 
+       nn12=0; nn56=0; ns34=0; ns78=0; ne13=0; ne57=0; nw24=0; nw68=0; 
+       ne1=0; ne3=0; ne5=0; ne7=0; nw2=0; nw4=0; nw6=0; nw8=0; 
+       rscpow(1) = 1.0d0;
+       rtmp = scales(ilev+1)/boxsize(ilev+1);
+       for i=1:nterms(ilev+1)
+         rscpow(i+1) = rscpow(i)*rtmp;
+       end       
+       for ibox = laddr(1,ilev):laddr(2,ilev)
+         ithd = 0;
+         ithd = ithd + 1;
+         npts = 0;
+         nchild = itree(ipointer(4)+ibox-1);
+         istart = isrcse(1,ibox);
+         iend = isrcse(2,ibox);
+         npts = npts + iend-istart+1;
+         if((npts>0)&&(nchild>0))
+           nborsi = itree((ipointer(7)+mnbors*(ibox-1)):(ipointer(7)+mnbors*(ibox-1)-1+itree(ipointer(6)+ibox-1)));
+           ichildi = itree(ipointer(5):(ipointer(5)-1+8*nboxes));
+           % below fails for some reason, error message: Identifier should be a string ?
+%            getpwlistall0_mex(ibox,boxsize(ilev+1),nboxes,...
+%               itree(ipointer(6)+ibox-1),nborsi,...
+%               nchild,ichildi,treecenters,...
+%               isep,nuall,uall(:,ithd),ndall,dall(:,ithd),...
+%               nnall,nall(:,ithd),nsall,sall(:,ithd),...
+%               neall,eall(:,ithd),nwall,wall(:,ithd),...
+%               nu1234,u1234(:,ithd),nd5678,d5678(:,ithd),...
+%               nn1256,n1256(:,ithd),ns3478,s3478(:,ithd),...
+%               ne1357,e1357(:,ithd),nw2468,w2468(:,ithd),...
+%               nn12,n12(:,ithd),nn56,n56(:,ithd),ns34,s34(:,ithd),...
+%               ns78,s78(:,ithd),ne13,e13(:,ithd),ne57,e57(:,ithd),...
+%               nw24,w24(:,ithd),nw68,w68(:,ithd),ne1,e1(:,ithd),...
+%               ne3,e3(:,ithd),ne5,e5(:,ithd),ne7,e7(:,ithd),...
+%               nw2,w2(:,ithd),nw4,w4(:,ithd),nw6,w6(:,ithd),...
+%               nw8,w8(:,ithd));
+%            keyboard
+
+%            uall=zeros(200,nthd); dall=zeros(200,nthd); nall=zeros(120,nthd); sall=zeros(120,nthd);
+%            eall=zeros(72,nthd); wall=zeros(72,nthd);
+%            u1234=zeros(36,nthd); d5678=zeros(36,nthd); 
+%            n1256=zeros(24,nthd); s3478=zeros(24,nthd);
+%            e1357=zeros(16,nthd); w2468=zeros(16,nthd); 
+%            n12=zeros(20,nthd); n56=zeros(20,nthd); s34=zeros(20,nthd); s78=zeros(20,nthd);
+%            e13=zeros(20,nthd); e57=zeros(20,nthd); w24=zeros(20,nthd); w68=zeros(20,nthd);
+%            e1=zeros(5,nthd); e3=zeros(5,nthd); e5=zeros(5,nthd); e7=zeros(5,nthd);
+%            w2=zeros(5,nthd); w4=zeros(5,nthd); w6=zeros(5,nthd); w8=zeros(5,nthd);
+%            iboxsubcenters=zeros(3,8,nthd);
+%            iboxfl=zeros(2,8,nthd);
+
+         end
+       end
        keyboard
+
+       
+
 %    boxsize(0:nlevels)
 %    nterms(0:nlevels)
 %    scales(0:nlevels)

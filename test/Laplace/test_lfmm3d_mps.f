@@ -909,7 +909,7 @@ c      init uall,dall,...,etc arrays
        allocate(e1357(16,nthd),w2468(16,nthd),n12(20,nthd))
        allocate(n56(20,nthd),s34(20,nthd),s78(20,nthd))
        allocate(e13(20,nthd),e57(20,nthd),w24(20,nthd),w68(20,nthd))
-       allocate(e1(20,nthd),e3(5,nthd),e5(5,nthd),e7(5,nthd))
+       allocate(e1(5,nthd),e3(5,nthd),e5(5,nthd),e7(5,nthd))
        allocate(w2(5,nthd),w4(5,nthd),w6(5,nthd),w8(5,nthd))
        allocate(iboxsubcenters(3,8,nthd))
        allocate(iboxfl(2,8,nthd))
@@ -1003,7 +1003,6 @@ cc                process east-west for current box
                 
             endif
          enddo  
-         deallocate(iboxlexp)
          
         !  if (ibox.eq.11) then
         !   ! print *, "nterms : ", nterms(ilev)
@@ -1016,15 +1015,56 @@ cc                process east-west for current box
           ! close(1)        
         ! endif
 
-          open(1, file = 'mps_data.dat')
-          do k=1,6
-          do j=1,nboxes  
-          do i=1,nexptotp
-              write(1,*) imag(mexp(1,i,j,k))
-          end do  
-          enddo
-          enddo
-          close(1)        
+          ! open(1, file = 'mps_data.dat')
+          ! do k=1,6
+          ! do j=1,nboxes  
+          ! do i=1,nexptotp
+          !     write(1,*) imag(mexp(1,i,j,k))
+          ! end do  
+          ! enddo
+          ! enddo
+          ! close(1)
+         print *, "ilev: ", ilev      
+         rscpow(0) = 1.0d0
+         rtmp = scales(ilev)/boxsize(ilev)
+         do i=1,nterms(ilev)
+            rscpow(i) = rscpow(i-1)*rtmp
+         enddo
+         do ibox = laddr(1,ilev-1),laddr(2,ilev-1)
+           ithd = 0
+C$         ithd=omp_get_thread_num()
+           ithd = ithd + 1
+           npts = 0
+           nchild = itree(ipointer(4)+ibox-1)
+           istart = isrcse(1,ibox)
+           iend = isrcse(2,ibox)
+           npts = npts + iend-istart+1
+           if(npts.gt.0.and.nchild.gt.0) then
+               call getpwlistall(ibox,boxsize(ilev),nboxes,
+     1         itree(ipointer(6)+ibox-1),itree(ipointer(7)+
+     2         mnbors*(ibox-1)),nchild,itree(ipointer(5)),treecenters,
+     3         isep,nuall,uall(1,ithd),ndall,dall(1,ithd),
+     4         nnall,nall(1,ithd),nsall,sall(1,ithd),
+     5         neall,eall(1,ithd),nwall,wall(1,ithd),
+     6         nu1234,u1234(1,ithd),nd5678,d5678(1,ithd),
+     7         nn1256,n1256(1,ithd),ns3478,s3478(1,ithd),
+     8         ne1357,e1357(1,ithd),nw2468,w2468(1,ithd),
+     9         nn12,n12(1,ithd),nn56,n56(1,ithd),ns34,s34(1,ithd),
+     9         ns78,s78(1,ithd),ne13,e13(1,ithd),ne57,e57(1,ithd),
+     9         nw24,w24(1,ithd),nw68,w68(1,ithd),ne1,e1(1,ithd),
+     9         ne3,e3(1,ithd),ne5,e5(1,ithd),ne7,e7(1,ithd),
+     9         nw2,w2(1,ithd),nw4,w4(1,ithd),nw6,w6(1,ithd),
+     9         nw8,w8(1,ithd))
+              !  if (ibox.eq.2) then
+              !   print *, "uall : ", uall(:,ithd)
+              !   print *, "itree(6) :", itree(ipointer(6)+ibox-1) 
+              !   print *, "itree(7) :",itree(ipointer(7)+mnbors*(ibox-1))
+              !  endif
+               
+
+           endif
+         enddo
+         deallocate(iboxlexp)
 
 ! this is the end of test code part, check mexp(:,:,:,1:6)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1102,82 +1142,90 @@ C$         ithd=omp_get_thread_num()
            iend = isrcse(2,ibox)
            npts = npts + iend-istart+1
            if(npts.gt.0.and.nchild.gt.0) then
-               call getpwlistall(ibox,boxsize(ilev),nboxes,
-     1         itree(ipointer(6)+ibox-1),itree(ipointer(7)+
+
+   !            call processudexp0(nd,ibox,ilev,nboxes,treecenters,
+    !  1         itree(ipointer(5)),scales(ilev),boxsize(ilev),
+    !  2         nterms(ilev),
+    !  2         iaddr,rmlexp,rlams,whts,
+    !  3         nlams,nfourier,nphysical,nthmax,nexptot,nexptotp,mexp,
+    !  4         nuall,uall(1,ithd),nu1234,u1234(1,ithd),
+    !  5         ndall,dall(1,ithd),nd5678,d5678(1,ithd),
+    !  6         mexpf1(1,1,ithd),mexpf2(1,1,ithd),
+    !  7         mexpp1(1,1,ithd),mexpp2(1,1,ithd),
+    !  8         mexppall(1,1,1,ithd),mexppall(1,1,2,ithd),
+    !  9         mexppall(1,1,3,ithd),mexppall(1,1,4,ithd),
+    !  8         xshift,yshift,zshift,fexpback,rlsc,rscpow,
+    !  9         pgboxwexp,cntlist4,list4ct,nlist4,list4,mnlist4)
+
+    !            call processnsexp0(nd,ibox,ilev,nboxes,treecenters,
+    !  1         itree(ipointer(5)),scales(ilev),boxsize(ilev),
+    !  2         nterms(ilev),
+    !  2         iaddr,rmlexp,rlams,whts,
+    !  3         nlams,nfourier,nphysical,nthmax,nexptot,nexptotp,mexp,
+    !  4         nnall,nall(1,ithd),nn1256,n1256(1,ithd),
+    !  5         nn12,n12(1,ithd),nn56,n56(1,ithd),nsall,sall(1,ithd),
+    !  6         ns3478,s3478(1,ithd),ns34,s34(1,ithd),ns78,s78(1,ithd),
+    !  7         mexpf1(1,1,ithd),mexpf2(1,1,ithd),
+    !  8         mexpp1(1,1,ithd),mexpp2(1,1,ithd),
+    !  9         mexppall(1,1,1,ithd),mexppall(1,1,2,ithd),
+    !  9         mexppall(1,1,3,ithd),mexppall(1,1,4,ithd),
+    !  9         mexppall(1,1,5,ithd),mexppall(1,1,6,ithd),
+    !  9         mexppall(1,1,7,ithd),mexppall(1,1,8,ithd),rdplus,
+    !  9         xshift,yshift,zshift,fexpback,rlsc,rscpow,
+    !  9         pgboxwexp,cntlist4,list4ct,nlist4,list4,mnlist4)  
+
+    !            call processewexp0(nd,ibox,ilev,nboxes,treecenters,
+    !  1         itree(ipointer(5)),scales(ilev),boxsize(ilev),
+    !  2         nterms(ilev),
+    !  2         iaddr,rmlexp,rlams,whts,
+    !  3         nlams,nfourier,nphysical,nthmax,nexptot,nexptotp,mexp,
+    !  4         neall,eall(1,ithd),ne1357,e1357(1,ithd),
+    !  5         ne13,e13(1,ithd),ne57,e57(1,ithd),ne1,e1(1,ithd),
+    !  6         ne3,e3(1,ithd),ne5,e5(1,ithd),
+    !  7         ne7,e7(1,ithd),nwall,wall(1,ithd),
+    !  8         nw2468,w2468(1,ithd),
+    !  9         nw24,w24(1,ithd),nw68,w68(1,ithd),
+    !  9         nw2,w2(1,ithd),nw4,w4(1,ithd),nw6,w6(1,ithd),
+    !  9         nw8,w8(1,ithd),
+    !  9         mexpf1(1,1,ithd),mexpf2(1,1,ithd),
+    !  9         mexpp1(1,1,ithd),mexpp2(1,1,ithd),
+    !  9         mexppall(1,1,1,ithd),mexppall(1,1,2,ithd),
+    !  9         mexppall(1,1,3,ithd),mexppall(1,1,4,ithd),
+    !  9         mexppall(1,1,5,ithd),mexppall(1,1,6,ithd),
+    !  9         mexppall(1,1,7,ithd),mexppall(1,1,8,ithd),
+    !  9         mexppall(1,1,9,ithd),mexppall(1,1,10,ithd),
+    !  9         mexppall(1,1,11,ithd),mexppall(1,1,12,ithd),
+    !  9         mexppall(1,1,13,ithd),mexppall(1,1,14,ithd),
+    !  9         mexppall(1,1,15,ithd),mexppall(1,1,16,ithd),rdminus,
+    !  9         xshift,yshift,zshift,fexpback,rlsc,rscpow,
+    !  9         pgboxwexp,cntlist4,list4ct,nlist4,list4,mnlist4)
+
+              call getpwlistallprocessudnsewexp(ibox,boxsize(ilev),
+     1         nboxes,itree(ipointer(6)+ibox-1),itree(ipointer(7)+
      2         mnbors*(ibox-1)),nchild,itree(ipointer(5)),treecenters,
-     3         isep,nuall,uall(1,ithd),ndall,dall(1,ithd),
-     4         nnall,nall(1,ithd),nsall,sall(1,ithd),
-     5         neall,eall(1,ithd),nwall,wall(1,ithd),
-     6         nu1234,u1234(1,ithd),nd5678,d5678(1,ithd),
-     7         nn1256,n1256(1,ithd),ns3478,s3478(1,ithd),
-     8         ne1357,e1357(1,ithd),nw2468,w2468(1,ithd),
-     9         nn12,n12(1,ithd),nn56,n56(1,ithd),ns34,s34(1,ithd),
-     9         ns78,s78(1,ithd),ne13,e13(1,ithd),ne57,e57(1,ithd),
-     9         nw24,w24(1,ithd),nw68,w68(1,ithd),ne1,e1(1,ithd),
-     9         ne3,e3(1,ithd),ne5,e5(1,ithd),ne7,e7(1,ithd),
-     9         nw2,w2(1,ithd),nw4,w4(1,ithd),nw6,w6(1,ithd),
-     9         nw8,w8(1,ithd))
-               call processudexp(nd,ibox,ilev,nboxes,treecenters,
-     1         itree(ipointer(5)),scales(ilev),boxsize(ilev),
-     2         nterms(ilev),
-     2         iaddr,rmlexp,rlams,whts,
-     3         nlams,nfourier,nphysical,nthmax,nexptot,nexptotp,mexp,
-     4         nuall,uall(1,ithd),nu1234,u1234(1,ithd),
-     5         ndall,dall(1,ithd),nd5678,d5678(1,ithd),
-     6         mexpf1(1,1,ithd),mexpf2(1,1,ithd),
-     7         mexpp1(1,1,ithd),mexpp2(1,1,ithd),mexppall(1,1,1,ithd),
-     8         mexppall(1,1,2,ithd),mexppall(1,1,3,ithd),
-     9         mexppall(1,1,4,ithd),xshift,
-     8         yshift,zshift,fexpback,rlsc,rscpow,
-     9         pgboxwexp,cntlist4,list4ct,
-     9         nlist4,list4,mnlist4)
-               call processnsexp(nd,ibox,ilev,nboxes,treecenters,
-     1         itree(ipointer(5)),scales(ilev),boxsize(ilev),
-     2         nterms(ilev),
-     2         iaddr,rmlexp,rlams,whts,
-     3         nlams,nfourier,nphysical,nthmax,nexptot,nexptotp,mexp,
-     4         nnall,nall(1,ithd),nn1256,n1256(1,ithd),
-     5         nn12,n12(1,ithd),nn56,n56(1,ithd),nsall,sall(1,ithd),
-     6         ns3478,s3478(1,ithd),ns34,s34(1,ithd),ns78,s78(1,ithd),
-     7         mexpf1(1,1,ithd),mexpf2(1,1,ithd),
-     8         mexpp1(1,1,ithd),mexpp2(1,1,ithd),mexppall(1,1,1,ithd),
-     9         mexppall(1,1,2,ithd),mexppall(1,1,3,ithd),
-     9         mexppall(1,1,4,ithd),
-     9         mexppall(1,1,5,ithd),mexppall(1,1,6,ithd),
-     9         mexppall(1,1,7,ithd),
-     9         mexppall(1,1,8,ithd),rdplus,xshift,yshift,zshift,
-     9         fexpback,rlsc,rscpow,
-     9         pgboxwexp,cntlist4,list4ct,
-     9         nlist4,list4,mnlist4)    
-               call processewexp(nd,ibox,ilev,nboxes,treecenters,
-     1         itree(ipointer(5)),scales(ilev),boxsize(ilev),
-     2         nterms(ilev),
-     2         iaddr,rmlexp,rlams,whts,
-     3         nlams,nfourier,nphysical,nthmax,nexptot,nexptotp,mexp,
-     4         neall,eall(1,ithd),ne1357,e1357(1,ithd),
-     5         ne13,e13(1,ithd),ne57,e57(1,ithd),ne1,e1(1,ithd),
-     6         ne3,e3(1,ithd),ne5,e5(1,ithd),
-     7         ne7,e7(1,ithd),nwall,wall(1,ithd),
-     8         nw2468,w2468(1,ithd),
-     9         nw24,w24(1,ithd),nw68,w68(1,ithd),
-     9         nw2,w2(1,ithd),nw4,w4(1,ithd),nw6,w6(1,ithd),
-     9         nw8,w8(1,ithd),
+     3         isep,
+     4         nuall,uall(1,ithd),ndall,dall(1,ithd),
+     5         nnall,nall(1,ithd),nsall,sall(1,ithd),
+     6         neall,eall(1,ithd),nwall,wall(1,ithd),
+     9         nd,ilev,scales(ilev),nterms(ilev),iaddr,rmlexp,rlams,
+     9         whts,nlams,nfourier,nphysical,
+     9         nthmax,nexptot,nexptotp,mexp,
      9         mexpf1(1,1,ithd),mexpf2(1,1,ithd),
-     9         mexpp1(1,1,ithd),mexpp2(1,1,ithd),mexppall(1,1,1,ithd),
-     9         mexppall(1,1,2,ithd),mexppall(1,1,3,ithd),
-     9         mexppall(1,1,4,ithd),
+     9         mexpp1(1,1,ithd),mexpp2(1,1,ithd),
+     9         mexppall(1,1,1,ithd),mexppall(1,1,2,ithd),
+     9         mexppall(1,1,3,ithd),mexppall(1,1,4,ithd),
+     9         xshift,yshift,zshift,fexpback,rlsc,rscpow,
+     9         pgboxwexp,cntlist4,list4ct,nlist4,list4,mnlist4,
      9         mexppall(1,1,5,ithd),mexppall(1,1,6,ithd),
-     9         mexppall(1,1,7,ithd),mexppall(1,1,8,ithd),
-     9         mexppall(1,1,9,ithd),
-     9         mexppall(1,1,10,ithd),mexppall(1,1,11,ithd),
-     9         mexppall(1,1,12,ithd),
+     9         mexppall(1,1,7,ithd),mexppall(1,1,8,ithd),rdplus,
+     9         mexppall(1,1,9,ithd),mexppall(1,1,10,ithd),
+     9         mexppall(1,1,11,ithd),mexppall(1,1,12,ithd),
      9         mexppall(1,1,13,ithd),mexppall(1,1,14,ithd),
-     9         mexppall(1,1,15,ithd),
-     9         mexppall(1,1,16,ithd),rdminus,xshift,yshift,zshift,
-     9         fexpback,rlsc,rscpow,
-     9         pgboxwexp,cntlist4,list4ct,nlist4,list4,mnlist4)
+     9         mexppall(1,1,15,ithd),mexppall(1,1,16,ithd),rdminus)
+
            endif
            if(nlist3(ibox).gt.0.and.npts.gt.0) then
+             ! this is never processed...
              call getlist3pwlistall(ibox,boxsize(ilev),nboxes,
      1            nlist3(ibox),list3(1,ibox),isep,
      2            treecenters,nuall,uall(1,ithd),ndall,dall(1,ithd),

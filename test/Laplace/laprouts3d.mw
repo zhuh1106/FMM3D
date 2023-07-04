@@ -320,3 +320,11 @@ rdplus = reshape(rdplus,nterms1s,nterms2p1);
 # FORTRAN rotztox(int[1] nd, int[1] nterms, dcomplex[ndnterms,ntermst2p1] mpole, inout dcomplex[ndnterms,ntermst2p1] mrotate, double[nterms1s,nterms2p1] rdplus);
 mrotate = reshape(mrotate,nd,nterms+1,2*nterms+1);
 end
+
+@function [nuall,uall,ndall,dall,nnall,nall,nsall,sall,neall,eall,nwall,wall,nu1234,u1234,nd5678,d5678,nn1256,n1256,ns3478,s3478,ne1357,e1357,nw2468,w2468,nn12,n12,nn56,n56,ns34,s34,ns78,s78,ne13,e13,ne57,e57,nw24,w24,nw68,w68,ne1,e1,ne3,e3,ne5,e5,ne7,e7,nw2,w2,nw4,w4,nw6,w6,nw8,w8] = getpwlistall_mex(ibox,bs,nboxes,nnbors,nbors,nchild,ichild,centers,isep,nuall,uall,ndall,dall,nnall,nall,nsall,sall,neall,eall,nwall,wall,nu1234,u1234,nd5678,d5678,nn1256,n1256,ns3478,s3478,ne1357,e1357,nw2468,w2468,nn12,n12,nn56,n56,ns34,s34,ns78,s78,ne13,e13,ne57,e57,nw24,w24,nw68,w68,ne1,e1,ne3,e3,ne5,e5,ne7,e7,nw2,w2,nw4,w4,nw6,w6,nw8,w8)
+% ...
+% error: Identifier should be a string... why?
+ichild = reshape(ichild,8,nboxes);
+# FORTRAN getpwlistall(int[1]ibox,double[1]bs,int[1]nboxes,int[1]nnbors,int[nnbors]nbors,int[1]nchild,int[8,nboxes]ichild,double[3,nboxes]centers,int[1]isep,inout int[1]nuall,inout int[200]uall,inout int[1]ndall,inout int[200]dall,inout int[1]nnall,inout int[120]nall,inout int[1]nsall,inout int[120]sall,inout int[1]neall,inout int[72]eall,inout int[1]nwall,inout int[72]wall,inout int[1]nu1234,inout int[36]u1234,inout int[1]nd5678,inout int[36]d5678,inout int[1]nn1256,inout int[24]n1256,inout int[1]ns3478,inout int[24]s3478,inout int[1]ne1357,inout int[16]e1357,inout int[1]nw2468,inout int[16]w2468,inout int[1]nn12,inout int[20]n12,inout int[1]nn56,inout int[20]n56,inout int[1]ns34,inout int[20]s34,inout int[1]ns78,inout int[20]s78,inout int[1]ne13,inout int[20]e13,inout int[1]ne57,inout int[20]e57,inout int[1]nw24,inout int[20]w24,inout int[1]nw68,inout int[20]w68,inout int[1]ne1,inout int[5]e1,inout int[1]ne3,inout int[5]e3,inout int[1]ne5,inout int[5]e5,inout int[1]ne7,inout int[5]e7,inout int[1]nw2,inout int[5]w2,inout int[1]nw4,inout int[5]w4,inout int[1]nw6,inout int[5]w6,inout int[1]nw8,inout int[5]w8);
+end    
+
