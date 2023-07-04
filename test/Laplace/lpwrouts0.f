@@ -1,19 +1,14 @@
 c----------------------------------------------------------------
 c----- to hide a few variables... right now has more though...
       subroutine getpwlistallprocessudnsewexp(ibox,bs,nboxes,nnbors,
-     1           nbors,nchild,ichild,centers,isep,
-     2           nuall,uall,ndall,dall,nnall,
-     3           nall,nsall,sall,neall,eall,nwall,wall,
-     8           nd,ilev,rscale,nterms,iaddr,rmlexp,rlams,
-     9           whts,nlams,nfourier,nphysical,
-     9           nthmax,nexptot,nexptotp,mexp,
-     9           mexpup,mexpdown,mexpupphys,mexpdownphys,
-     9           mexpuall1,mexpuall2,mexpuall3,mexpuall4,
-     9           xs,ys,zs,fexpback,rlsc,rscpow,
-     9           pgboxwexp,cntlist4,list4,nlist4s,ilist4,mnlist4,
-     9           mexpsall5,mexpsall6,mexpsall7,mexpsall8,rdplus,
-     9           mexpwall,mexpw1357,mexpw13,mexpw57,
-     9           mexpw1,mexpw3,mexpw5,mexpw7,rdminus)
+     1           nbors,nchild,ichild,centers,
+     2           isep,nd,ilev,rscale,nterms,iaddr,rmlexp,
+     3           rlams,whts,nlams,nfourier,nphysical,
+     4           nthmax,nexptot,nexptotp,mexp,
+     5           mexpup,mexpdown,mexpupphys,mexpdownphys,
+     6           mexppall,rdplus,rdminus,
+     7           xs,ys,zs,fexpback,rlsc,rscpow,
+     8           pgboxwexp,cntlist4,list4,nlist4s,ilist4,mnlist4)
 c-------------------------------------------------------------------
       implicit none
       integer ibox 
@@ -31,23 +26,16 @@ c-------------------------------------------------------------------
       double complex mexp(nd,nexptotp,nboxes,6)
       double complex mexpup(nd,nexptot),mexpdown(nd,nexptot)
       double complex mexpupphys(nd,nexptotp),mexpdownphys(nd,nexptotp)
-      double complex mexpuall1(nd,nexptotp),mexpuall2(nd,nexptotp)
-      double complex mexpuall3(nd,nexptotp),mexpuall4(nd,nexptotp)
+      double complex mexppall(nd,nexptotp,16)
       double complex xs(-5:5,nexptotp),ys(-5:5,nexptotp)
       double precision zs(5,nexptotp)
       double complex fexpback(*)
       double precision rlsc(0:nterms,0:nterms,nlams),rscpow(0:nterms)
       double complex pgboxwexp(nd,nexptotp,cntlist4,6)
       integer cntlist4,list4(*),nlist4s(*),ilist4(*),mnlist4
-      ! additional input for 2nd
-      double complex mexpsall5(nd,nexptotp),mexpsall6(nd,nexptotp)
-      double complex mexpsall7(nd,nexptotp),mexpsall8(nd,nexptotp)
+      ! additional input for processnsexp
       double precision rdplus(0:nterms,0:nterms,-nterms:nterms)
-      ! additional input for 3rd
-      double complex mexpwall(nd,nexptotp),mexpw1357(nd,nexptotp)
-      double complex mexpw13(nd,nexptotp),mexpw57(nd,nexptotp)
-      double complex mexpw1(nd,nexptotp),mexpw3(nd,nexptotp)
-      double complex mexpw5(nd,nexptotp),mexpw7(nd,nexptotp)
+      ! additional input for processewexp
       double precision rdminus(0:nterms,0:nterms,-nterms:nterms)
 
 
@@ -89,7 +77,8 @@ c      init uall,dall,...,etc arrays
      4         nuall,uall,nu1234,u1234,
      5         ndall,dall,nd5678,d5678,
      6         mexpup,mexpdown,mexpupphys,mexpdownphys,
-     8         mexpuall1,mexpuall2,mexpuall3,mexpuall4,
+     8         mexppall(1,1,1),mexppall(1,1,2),
+     9         mexppall(1,1,3),mexppall(1,1,4),
      9         xs,ys,zs,fexpback,rlsc,rscpow,
      9         pgboxwexp,cntlist4,list4,nlist4s,ilist4,mnlist4)
       
@@ -102,8 +91,10 @@ c      init uall,dall,...,etc arrays
      5         nn12,n12,nn56,n56,nsall,sall,
      6         ns3478,s3478,ns34,s34,ns78,s78,
      7         mexpup,mexpdown,mexpupphys,mexpdownphys,
-     9         mexpuall1,mexpuall2,mexpuall3,mexpuall4,
-     9         mexpsall5,mexpsall6,mexpsall7,mexpsall8,rdplus,
+     9         mexppall(1,1,1),mexppall(1,1,2),
+     9         mexppall(1,1,3),mexppall(1,1,4),
+     9         mexppall(1,1,5),mexppall(1,1,6),
+     9         mexppall(1,1,7),mexppall(1,1,8),rdplus,
      9         xs,ys,zs,fexpback,rlsc,rscpow,
      9         pgboxwexp,cntlist4,list4,nlist4s,ilist4,mnlist4)
 
@@ -121,10 +112,14 @@ c      init uall,dall,...,etc arrays
      9         nw2,w2,nw4,w4,nw6,w6,
      9         nw8,w8,
      9         mexpup,mexpdown,mexpupphys,mexpdownphys,
-     9         mexpuall1,mexpuall2,mexpuall3,mexpuall4,
-     9         mexpsall5,mexpsall6,mexpsall7,mexpsall8,
-     9         mexpwall,mexpw1357,mexpw13,mexpw57,
-     9         mexpw1,mexpw3,mexpw5,mexpw7,rdminus,
+     9         mexppall(1,1,1),mexppall(1,1,2),
+     9         mexppall(1,1,3),mexppall(1,1,4),
+     9         mexppall(1,1,5),mexppall(1,1,6),
+     9         mexppall(1,1,7),mexppall(1,1,8),
+     9         mexppall(1,1,9),mexppall(1,1,10),
+     9         mexppall(1,1,11),mexppall(1,1,12),
+     9         mexppall(1,1,13),mexppall(1,1,14),
+     9         mexppall(1,1,15),mexppall(1,1,16),rdminus,
      9         xs,ys,zs,fexpback,rlsc,rscpow,
      9         pgboxwexp,cntlist4,list4,nlist4s,ilist4,mnlist4)
 

@@ -260,7 +260,7 @@ rlsc = reshape(rlsc,nterms1,nterms1,nlambs);
 end
 
 @function [xs,ys,zs] = mkexps_mex(rlams,nlambs,numphys,nexptotp,xs,ys,zs)
-# FORTRAN mkexps(double[nlambs] rlams, int[1] nlambs, int[nlambs] numphys, int[1] nexptotp, inout dcomplex[11,nexptotp] xs, inout dcomplex[11,nexptotp] ys, inout dcomplex[5,nexptotp] zs);
+# FORTRAN mkexps(double[nlambs] rlams, int[1] nlambs, int[nlambs] numphys, int[1] nexptotp, inout dcomplex[11,nexptotp] xs, inout dcomplex[11,nexptotp] ys, inout double[5,nexptotp] zs);
 end
 
 @function [fexpe,fexpo,fexpback] = mkfexp_mex(nlambs,numfour,numphys,fexpe,fexpo,fexpback)

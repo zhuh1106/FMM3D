@@ -1263,7 +1263,7 @@ MWF77_RETURN MWF77_vwts(double*, double*, int*);
 MWF77_RETURN MWF77_numthetahalf(int*, int*);
 MWF77_RETURN MWF77_numthetafour(int*, int*);
 MWF77_RETURN MWF77_rlscini(double*, int*, double*, int*);
-MWF77_RETURN MWF77_mkexps(double*, int*, int*, int*, dcomplex*, dcomplex*, dcomplex*);
+MWF77_RETURN MWF77_mkexps(double*, int*, int*, int*, dcomplex*, dcomplex*, double*);
 MWF77_RETURN MWF77_mkfexp(int*, int*, int*, dcomplex*, dcomplex*, dcomplex*);
 MWF77_RETURN MWF77_mpscale(int*, int*, dcomplex*, double*, dcomplex*);
 MWF77_RETURN MWF77_mpoletoexp(int*, dcomplex*, int*, int*, int*, int*, dcomplex*, dcomplex*, double*);
@@ -6167,9 +6167,9 @@ mw_err_label:
 }
 
 /* ---- laprouts3d.mw: 263 ----
- * mkexps(double[nlambs] rlams, int[1] nlambs, int[nlambs] numphys, int[1] nexptotp, inout dcomplex[11, nexptotp] xs, inout dcomplex[11, nexptotp] ys, inout dcomplex[5, nexptotp] zs);
+ * mkexps(double[nlambs] rlams, int[1] nlambs, int[nlambs] numphys, int[1] nexptotp, inout dcomplex[11, nexptotp] xs, inout dcomplex[11, nexptotp] ys, inout double[5, nexptotp] zs);
  */
-static const char* stubids33_ = "mkexps(i double[x], i int[x], i int[x], i int[x], io dcomplex[xx], io dcomplex[xx], io dcomplex[xx])";
+static const char* stubids33_ = "mkexps(i double[x], i int[x], i int[x], i int[x], io dcomplex[xx], io dcomplex[xx], io double[xx])";
 
 void mexStub33(int nlhs, mxArray* plhs[],
               int nrhs, const mxArray* prhs[])
@@ -6181,7 +6181,7 @@ void mexStub33(int nlhs, mxArray* plhs[],
     int*        in3_ =0; /* nexptotp   */
     dcomplex*   in4_ =0; /* xs         */
     dcomplex*   in5_ =0; /* ys         */
-    dcomplex*   in6_ =0; /* zs         */
+    double*     in6_ =0; /* zs         */
     mwSize      dim7_;   /* nlambs     */
     mwSize      dim8_;   /* 1          */
     mwSize      dim9_;   /* nlambs     */
@@ -6286,10 +6286,7 @@ void mexStub33(int nlhs, mxArray* plhs[],
     } else
         in5_ = NULL;
     if (mxGetM(prhs[6])*mxGetN(prhs[6]) != 0) {
-        if( mxGetClassID(prhs[6]) != mxDOUBLE_CLASS )
-            mw_err_txt_ = "Invalid array argument, mxDOUBLE_CLASS expected";
-        if (mw_err_txt_) goto mw_err_label;
-        in6_ = mxWrapGetArray_dcomplex(prhs[6], &mw_err_txt_);
+        in6_ = mxWrapGetArray_double(prhs[6], &mw_err_txt_);
         if (mw_err_txt_)
             goto mw_err_label;
     } else
@@ -6301,8 +6298,8 @@ void mexStub33(int nlhs, mxArray* plhs[],
     mxWrapCopy_dcomplex(plhs[0], in4_, dim11_*dim12_);
     plhs[1] = mxCreateDoubleMatrix(dim13_, dim14_, mxCOMPLEX);
     mxWrapCopy_dcomplex(plhs[1], in5_, dim13_*dim14_);
-    plhs[2] = mxCreateDoubleMatrix(dim15_, dim16_, mxCOMPLEX);
-    mxWrapCopy_dcomplex(plhs[2], in6_, dim15_*dim16_);
+    plhs[2] = mxCreateDoubleMatrix(dim15_, dim16_, mxREAL);
+    mxWrapCopy_double(plhs[2], in6_, dim15_*dim16_);
 
 mw_err_label:
     if (in1_)  mxFree(in1_);
