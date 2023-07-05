@@ -328,3 +328,24 @@ ichild = reshape(ichild,8,nboxes);
 # FORTRAN getpwlistall(int[1]ibox,double[1]bs,int[1]nboxes,int[1]nnbors,int[nnbors]nbors,int[1]nchild,int[8,nboxes]ichild,double[3,nboxes]centers,int[1]isep,inout int[1]nuall,inout int[200]uall,inout int[1]ndall,inout int[200]dall,inout int[1]nnall,inout int[120]nall,inout int[1]nsall,inout int[120]sall,inout int[1]neall,inout int[72]eall,inout int[1]nwall,inout int[72]wall,inout int[1]nu1234,inout int[36]u1234,inout int[1]nd5678,inout int[36]d5678,inout int[1]nn1256,inout int[24]n1256,inout int[1]ns3478,inout int[24]s3478,inout int[1]ne1357,inout int[16]e1357,inout int[1]nw2468,inout int[16]w2468,inout int[1]nn12,inout int[20]n12,inout int[1]nn56,inout int[20]n56,inout int[1]ns34,inout int[20]s34,inout int[1]ns78,inout int[20]s78,inout int[1]ne13,inout int[20]e13,inout int[1]ne57,inout int[20]e57,inout int[1]nw24,inout int[20]w24,inout int[1]nw68,inout int[20]w68,inout int[1]ne1,inout int[5]e1,inout int[1]ne3,inout int[5]e3,inout int[1]ne5,inout int[5]e5,inout int[1]ne7,inout int[5]e7,inout int[1]nw2,inout int[5]w2,inout int[1]nw4,inout int[5]w4,inout int[1]nw6,inout int[5]w6,inout int[1]nw8,inout int[5]w8);
 end    
 
+@function rmlexp = getpwlistallprocessudnsewexp0_mex(ibox,bs,nboxes,nnbors,nbors,nchild,ichild,centers,isep,nd,ilev,rscale,nterms,iaddrtmp,rmlexp,lmptottmp,rlams,whts,nlams,nfourier,nphysical,nthmax,nexptot,nexptotp,mexp,mexpupdown,mexpupphys,mexpdownphys,mexppall,rdplus,rdminus,xs,ys,zs,fexpback,nn,rlsc,rscpow, pgboxwexp,cntlist4,list4ct,nlist4,list4,mnlist4)
+ichild=reshape(ichild,8,nboxes);
+ndnexptotp=nd*nexptotp;
+nboxes6=nboxes*6;
+mexp=reshape(mexp,ndnexptotp,nboxes6);
+ndnexptotp=nd*nexptotp;
+mexppall=reshape(mexppall,ndnexptotp,16);
+nterms1 = nterms+1;
+nterms1s = nterms1^2;
+nterms2p1 = nterms*2+1; 
+rdplus = reshape(rdplus,nterms1s,nterms2p1);
+rdminus = reshape(rdminus,nterms1s,nterms2p1);
+cntlist46 = cntlist4*6;
+nw8 = 0;
+rlsc = reshape(rlsc,nterms1s,nlams); 
+ndnexptot = nd*nexptot;
+mexpupdown = reshape(mexpupdown,ndnexptot,2);
+% why getpwlistallprocessudnsewexp0 gets Identifier should be a string error is a myth...
+%# FORTRAN getpwlistallprocessudnsewexp0(int[1] ibox, double[1] bs, int[1] nboxes, int[1] nnbors, int[nnbors] nbors, int[1] nchild, int[8,nboxes] ichild, double[3,nboxes] centers, int[1] isep, int[1] nd, int[1] ilev, double[1] rscale, int[1] nterms, int[2,nboxes] iaddrtmp, double[lmptottmp] rmlexp, int[1] lmptottmp, double[nlams] rlams, double[nlams] whts, int[1] nlams, int[nlams] nfourier, int[nlams] nphysical, int[1] nthmax, int[1] nexptot, int[1] nexptotp, dcomplex[ndnexptotp,nboxes6] mexp, dcomplex[nd,nexptot] mexpup, dcomplex[nd,nexptot] mexpdown, dcomplex[nd,nexptotp] mexpupphys, dcomplex[nd,nexptotp] mexpdownphys, dcomplex[ndnexptotp,16] mexppall, double[nterms1s,nterms2p1] rdplus, double[nterms1s,nterms2p1] rdminus, dcomplex[11,nexptotp] xs, dcomplex[11,nexptotp] ys, double[5,nexptotp] zs, dcomplex[nn] fexpback, int[1] nn, double[nterms1s,nlams] rlsc, double[nterms1] rscpow, dcomplex[ndnexptotp,cntlist46] pgboxwexp, int[1] cntlist4, int[nboxes] list4ct, int[nboxes] nlist4, int[mnlist4,nboxes] list4, int[1] mnlist4);
+# FORTRAN getpwlistallprocessudnsewexp02(int[1] ibox, double[1] bs, int[1] nboxes, int[1] nnbors, int[nnbors] nbors, int[1] nchild, int[8,nboxes] ichild, double[3,nboxes] centers, int[1] isep, int[1] nd, int[1] ilev, double[1] rscale, int[1] nterms, int[2,nboxes] iaddrtmp, inout double[lmptottmp] rmlexp, int[1] lmptottmp, double[nlams] rlams, double[nlams] whts, int[1] nlams, int[nlams] nfourier, int[nlams] nphysical, int[1] nthmax, int[1] nexptot, int[1] nexptotp, dcomplex[ndnexptotp,nboxes6] mexp, dcomplex[ndnexptot,2] mexpupdown, dcomplex[nd,nexptotp] mexpupphys, dcomplex[nd,nexptotp] mexpdownphys, dcomplex[ndnexptotp,16] mexppall, double[nterms1s,nterms2p1] rdplus, double[nterms1s,nterms2p1] rdminus,  dcomplex[11,nexptotp] xs, dcomplex[11,nexptotp] ys, double[5,nexptotp] zs, double[nterms1s,nlams] rlsc, double[nterms1] rscpow, dcomplex[nn] fexpback, int[1] nn);
+end

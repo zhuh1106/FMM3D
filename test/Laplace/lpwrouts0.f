@@ -1,14 +1,170 @@
 c----------------------------------------------------------------
 c----- to hide a few variables... right now has more though...
-      subroutine getpwlistallprocessudnsewexp(ibox,bs,nboxes,nnbors,
-     1           nbors,nchild,ichild,centers,
-     2           isep,nd,ilev,rscale,nterms,iaddr,rmlexp,
-     3           rlams,whts,nlams,nfourier,nphysical,
-     4           nthmax,nexptot,nexptotp,mexp,
-     5           mexpup,mexpdown,mexpupphys,mexpdownphys,
-     6           mexppall,rdplus,rdminus,
-     7           xs,ys,zs,fexpback,rlsc,rscpow,
-     8           pgboxwexp,cntlist4,list4,nlist4s,ilist4,mnlist4)
+      subroutine getpwlistallprocessudnsewexp02(ibox,bs,
+     1           nboxes,nnbors,
+     2           nbors,
+     3           nchild,ichild,centers,
+     4           isep,nd,ilev,rscale,nterms,iaddrtmp,
+     5           rmlexp,lmptottmp,
+     6           rlams,whts,nlams,nfourier,nphysical,
+     7           nthmax,nexptot,nexptotp,mexp,mexpupdown,
+     9           mexpupphys,mexpdownphys,
+     9           mexppall,rdplus,rdminus,
+     9           xs,ys,zs,rlsc,rscpow,fexpback,nn)
+c-------------------------------------------------------------------
+      implicit none
+      integer ibox, i, j
+      double precision boxsize,bs
+      integer nboxes,nnbors,nbors(nnbors)
+      integer nchild, ichild(8,nboxes)
+      double precision centers(3,nboxes)
+      integer isep
+      ! additional input for  processudexp0
+      integer nd, ilev, nterms, nlams, nthmax, nexptot, nexptotp, nn
+      integer nfourier(nlams), nphysical(nlams)
+      integer iaddrtmp(2,nboxes)
+      integer *8 iaddr(2,nboxes)
+      integer lmptottmp
+      double precision rscale
+      double precision rmlexp(lmptottmp),rlams(nlams),whts(nlams)
+      double complex mexp(nd,nexptotp,nboxes,6)
+      ! see if possible to pass in only one variable
+      double complex mexpupdown(nd,nexptot,2)
+      double complex mexpup(nd,nexptot),mexpdown(nd,nexptot)
+      double complex mexpupphys(nd,nexptotp),mexpdownphys(nd,nexptotp)
+      double complex mexppall(nd,nexptotp,16)
+      double complex xs(-5:5,nexptotp),ys(-5:5,nexptotp)
+      double precision zs(5,nexptotp)
+      double complex fexpback(nn)
+      double precision rlsc(0:nterms,0:nterms,nlams),rscpow(0:nterms)
+      double complex , allocatable :: pgboxwexp(:,:,:,:)
+      integer cntlist4,list4ct(nboxes),nlist4(nboxes),mnlist4
+      integer , allocatable :: list4(:,:)
+      ! additional input for processnsexp
+      double precision rdplus(0:nterms,0:nterms,-nterms:nterms)
+      ! additional input for processewexp
+      double precision rdminus(0:nterms,0:nterms,-nterms:nterms)
+
+
+      integer nuall,ndall,nnall,nsall,neall,nwall
+      integer nu1234,nd5678,nn1256,ns3478,ne1357,nw2468
+      integer nn12,nn56,ns34,ns78,ne13,ne57,nw24,nw68
+      integer ne1,ne3,ne5,ne7,nw2,nw4,nw6,nw8
+
+c      init uall,dall,...,etc arrays
+      integer uall(200),dall(200)
+      integer nall(120),sall(120)
+      integer eall(72),wall(72)
+      integer u1234(36),d5678(36)
+      integer n1256(24),s3478(24)
+      integer e1357(16),w2468(16)
+      integer n12(20),n56(20),s34(20),s78(20)
+      integer e13(20),e57(20),w24(20),w68(20)
+      integer e1(5),e3(5),e5(5),e7(5)
+      integer w2(5),w4(5),w6(5),w8(5)
+     
+      integer nthd,ithd
+
+      nthd = 1
+      ithd = 1
+      iaddr = int(iaddrtmp,8)
+
+c     since list4 is empty... this part needs to be changed...
+      cntlist4 = 0
+      list4ct = 0
+      nlist4 = 0
+      mnlist4 = 0
+      allocate(pgboxwexp(nd,nexptotp,cntlist4,6))   
+      allocate(list4(mnlist4,nboxes))   
+     
+      call getpwlistall0(ibox,bs,nboxes,nnbors,nbors,
+     1           nchild,ichild,centers,isep,nuall,uall,ndall,dall,nnall,
+     2           nall,nsall,sall,neall,eall,nwall,wall,nu1234,u1234,
+     3           nd5678,d5678,nn1256,n1256,ns3478,s3478,ne1357,e1357,
+     4           nw2468,w2468,nn12,n12,nn56,n56,ns34,s34,ns78,s78,ne13,
+     5           e13,ne57,e57,nw24,w24,nw68,w68,ne1,e1,ne3,e3,ne5,e5,
+     6           ne7,e7,nw2,w2,nw4,w4,nw6,w6,nw8,w8)
+
+      do i=1,nd
+        do j=1,nexptot
+          mexpup(i,j) = mexpupdown(i,j,1)
+          mexpdown(i,j) = mexpupdown(i,j,2)
+        enddo
+       enddo
+  
+      call processudexp0(nd,ibox,ilev,nboxes,centers,
+     1         ichild,rscale,bs,
+     2         nterms,
+     2         iaddr,rmlexp,rlams,whts,
+     3         nlams,nfourier,nphysical,nthmax,nexptot,nexptotp,mexp,
+     4         nuall,uall,nu1234,u1234,
+     5         ndall,dall,nd5678,d5678,
+     6         mexpup,mexpdown,mexpupphys,mexpdownphys,
+     8         mexppall(1,1,1),mexppall(1,1,2),
+     9         mexppall(1,1,3),mexppall(1,1,4),
+     9         xs,ys,zs,fexpback,rlsc,rscpow,
+     9         pgboxwexp,cntlist4,list4ct,nlist4,list4,mnlist4)
+      
+      call processnsexp0(nd,ibox,ilev,nboxes,centers,
+     1         ichild,rscale,bs,
+     2         nterms,
+     2         iaddr,rmlexp,rlams,whts,
+     3         nlams,nfourier,nphysical,nthmax,nexptot,nexptotp,mexp,
+     4         nnall,nall,nn1256,n1256,
+     5         nn12,n12,nn56,n56,nsall,sall,
+     6         ns3478,s3478,ns34,s34,ns78,s78,
+     7         mexpup,mexpdown,mexpupphys,mexpdownphys,
+     9         mexppall(1,1,1),mexppall(1,1,2),
+     9         mexppall(1,1,3),mexppall(1,1,4),
+     9         mexppall(1,1,5),mexppall(1,1,6),
+     9         mexppall(1,1,7),mexppall(1,1,8),rdplus,
+     9         xs,ys,zs,fexpback,rlsc,rscpow,
+     9         pgboxwexp,cntlist4,list4ct,nlist4,list4,mnlist4)
+
+      call processewexp0(nd,ibox,ilev,nboxes,centers,
+     1         ichild,rscale,bs,
+     2         nterms,
+     2         iaddr,rmlexp,rlams,whts,
+     3         nlams,nfourier,nphysical,nthmax,nexptot,nexptotp,mexp,
+     4         neall,eall,ne1357,e1357,
+     5         ne13,e13,ne57,e57,ne1,e1,
+     6         ne3,e3,ne5,e5,
+     7         ne7,e7,nwall,wall,
+     8         nw2468,w2468,
+     9         nw24,w24,nw68,w68,
+     9         nw2,w2,nw4,w4,nw6,w6,
+     9         nw8,w8,
+     9         mexpup,mexpdown,mexpupphys,mexpdownphys,
+     9         mexppall(1,1,1),mexppall(1,1,2),
+     9         mexppall(1,1,3),mexppall(1,1,4),
+     9         mexppall(1,1,5),mexppall(1,1,6),
+     9         mexppall(1,1,7),mexppall(1,1,8),
+     9         mexppall(1,1,9),mexppall(1,1,10),
+     9         mexppall(1,1,11),mexppall(1,1,12),
+     9         mexppall(1,1,13),mexppall(1,1,14),
+     9         mexppall(1,1,15),mexppall(1,1,16),rdminus,
+     9         xs,ys,zs,fexpback,rlsc,rscpow,
+     9         pgboxwexp,cntlist4,list4ct,nlist4,list4,mnlist4)
+
+       
+      
+      end subroutine getpwlistallprocessudnsewexp02
+      
+c----------------------------------------------------------------
+c----- to hide a few variables... right now has more though...
+      subroutine getpwlistallprocessudnsewexp0(ibox,bs,
+     1           nboxes,nnbors,
+     2           nbors,
+     3           nchild,ichild,centers,
+     4           isep,nd,ilev,rscale,nterms,iaddrtmp,
+     5           rmlexp,lmptottmp,
+     6           rlams,whts,nlams,nfourier,nphysical,
+     7           nthmax,nexptot,nexptotp,mexp,
+     8           mexpup,mexpdown,
+     9           mexpupphys,mexpdownphys,
+     9           mexppall,rdplus,rdminus,
+     9           xs,ys,zs,fexpback,nn,rlsc,rscpow,
+     9           pgboxwexp,cntlist4,list4ct,nlist4,list4,mnlist4)
 c-------------------------------------------------------------------
       implicit none
       integer ibox 
@@ -18,21 +174,24 @@ c-------------------------------------------------------------------
       double precision centers(3,nboxes)
       integer isep
       ! additional input for  processudexp0
-      integer nd, ilev, nterms, nlams, nthmax, nexptot, nexptotp
+      integer nd, ilev, nterms, nlams, nthmax, nexptot, nexptotp, nn
       integer nfourier(nlams), nphysical(nlams)
+      integer iaddrtmp(2,nboxes)
       integer *8 iaddr(2,nboxes)
+      integer lmptottmp
       double precision rscale
-      double precision rmlexp(*),rlams(*),whts(*)
+      double precision rmlexp(lmptottmp),rlams(nlams),whts(nlams)
       double complex mexp(nd,nexptotp,nboxes,6)
       double complex mexpup(nd,nexptot),mexpdown(nd,nexptot)
       double complex mexpupphys(nd,nexptotp),mexpdownphys(nd,nexptotp)
       double complex mexppall(nd,nexptotp,16)
       double complex xs(-5:5,nexptotp),ys(-5:5,nexptotp)
       double precision zs(5,nexptotp)
-      double complex fexpback(*)
+      double complex fexpback(nn)
       double precision rlsc(0:nterms,0:nterms,nlams),rscpow(0:nterms)
       double complex pgboxwexp(nd,nexptotp,cntlist4,6)
-      integer cntlist4,list4(*),nlist4s(*),ilist4(*),mnlist4
+      integer cntlist4,list4ct(nboxes),nlist4(nboxes),mnlist4
+      integer list4(mnlist4,nboxes)
       ! additional input for processnsexp
       double precision rdplus(0:nterms,0:nterms,-nterms:nterms)
       ! additional input for processewexp
@@ -60,6 +219,7 @@ c      init uall,dall,...,etc arrays
 
       nthd = 1
       ithd = 1
+      iaddr = int(iaddrtmp,8)
      
       call getpwlistall0(ibox,bs,nboxes,nnbors,nbors,
      1           nchild,ichild,centers,isep,nuall,uall,ndall,dall,nnall,
@@ -80,7 +240,7 @@ c      init uall,dall,...,etc arrays
      8         mexppall(1,1,1),mexppall(1,1,2),
      9         mexppall(1,1,3),mexppall(1,1,4),
      9         xs,ys,zs,fexpback,rlsc,rscpow,
-     9         pgboxwexp,cntlist4,list4,nlist4s,ilist4,mnlist4)
+     9         pgboxwexp,cntlist4,list4ct,nlist4,list4,mnlist4)
       
       call processnsexp0(nd,ibox,ilev,nboxes,centers,
      1         ichild,rscale,bs,
@@ -96,7 +256,7 @@ c      init uall,dall,...,etc arrays
      9         mexppall(1,1,5),mexppall(1,1,6),
      9         mexppall(1,1,7),mexppall(1,1,8),rdplus,
      9         xs,ys,zs,fexpback,rlsc,rscpow,
-     9         pgboxwexp,cntlist4,list4,nlist4s,ilist4,mnlist4)
+     9         pgboxwexp,cntlist4,list4ct,nlist4,list4,mnlist4)
 
       call processewexp0(nd,ibox,ilev,nboxes,centers,
      1         ichild,rscale,bs,
@@ -121,11 +281,11 @@ c      init uall,dall,...,etc arrays
      9         mexppall(1,1,13),mexppall(1,1,14),
      9         mexppall(1,1,15),mexppall(1,1,16),rdminus,
      9         xs,ys,zs,fexpback,rlsc,rscpow,
-     9         pgboxwexp,cntlist4,list4,nlist4s,ilist4,mnlist4)
+     9         pgboxwexp,cntlist4,list4ct,nlist4,list4,mnlist4)
 
        
       
-      end subroutine getpwlistallprocessudnsewexp
+      end subroutine getpwlistallprocessudnsewexp0
 
 
 c----------------------------------------------------------------

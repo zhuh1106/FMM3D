@@ -127,6 +127,7 @@ c      PW variables
        double complex, allocatable :: fexpe(:),fexpo(:),fexpback(:)
        double complex, allocatable :: mexp(:,:,:,:)
        double complex, allocatable :: mexpf1(:,:,:),mexpf2(:,:,:)
+       double complex, allocatable :: mexpf12(:,:,:,:)
        double complex, allocatable :: mexpp1(:,:,:),mexpp2(:,:,:)
        double complex, allocatable :: mexppall(:,:,:,:)
 
@@ -599,6 +600,7 @@ c      Compute total number of plane waves
          if(nphysical(i).gt.nphmax) nphmax = nphysical(i)
          nn = nn + nphysical(i)*nfourier(i)
        enddo
+       print *, "nn size: ", nn
        allocate(fexpe(nn),fexpo(nn),fexpback(nn))
        allocate(tmp(nd,0:nmax,-nmax:nmax,nthd))
        allocate(mptmp(lmptemp,nthd))
@@ -608,6 +610,7 @@ c      Compute total number of plane waves
        allocate(mexpf1(nd,nexptot,nthd),mexpf2(nd,nexptot,nthd),
      1          mexpp1(nd,nexptotp,nthd))
        allocate(mexpp2(nd,nexptotp,nthd),mexppall(nd,nexptotp,16,nthd))
+       allocate(mexpf12(nd,nexptot,nthd,2))
 cc     NOTE: there can be some memory savings here
        bigint = 0
        bigint = nboxes
@@ -1068,7 +1071,12 @@ C$         ithd=omp_get_thread_num()
 
 ! this is the end of test code part, check mexp(:,:,:,1:6)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
+       do i=1,nd
+        do j=1,nexptot
+          mexpf12(i,j,nthd,1) = mexpf1(i,j,nthd)
+          mexpf12(i,j,nthd,2) = mexpf2(i,j,nthd)
+        enddo
+       enddo
 
        do ilev=2,nlevels
          allocate(iboxlexp(nd*(nterms(ilev)+1)*
@@ -1142,17 +1150,42 @@ C$         ithd=omp_get_thread_num()
            iend = isrcse(2,ibox)
            npts = npts + iend-istart+1
            if(npts.gt.0.and.nchild.gt.0) then
-              call getpwlistallprocessudnsewexp(ibox,boxsize(ilev),
-     1         nboxes,itree(ipointer(6)+ibox-1),itree(ipointer(7)+
-     2         mnbors*(ibox-1)),nchild,itree(ipointer(5)),treecenters,
-     3         isep,nd,ilev,scales(ilev),nterms(ilev),iaddr,rmlexp,
-     4         rlams,whts,nlams,nfourier,nphysical,
-     5         nthmax,nexptot,nexptotp,mexp,
-     6         mexpf1(1,1,ithd),mexpf2(1,1,ithd),
-     7         mexpp1(1,1,ithd),mexpp2(1,1,ithd),
-     8         mexppall(1,1,1,ithd),rdplus,rdminus,
-     9         xshift,yshift,zshift,fexpback,rlsc,rscpow,
-     9         pgboxwexp,cntlist4,list4ct,nlist4,list4,mnlist4)
+              
+              print *, "nexptotp : ", nexptotp
+              call getpwlistallprocessudnsewexp02(ibox,boxsize(ilev),
+     1         nboxes,itree(ipointer(6)+ibox-1),
+     2         itree(ipointer(7)+mnbors*(ibox-1)),
+     3         nchild,itree(ipointer(5)),treecenters,
+     4         isep,nd,ilev,scales(ilev),nterms(ilev),iaddrtmp,
+     5         rmlexp,lmptottmp,
+     6         rlams,whts,nlams,nfourier,nphysical,
+     7         nthmax,nexptot,nexptotp,mexp,mexpf12,
+     9         mexpp1(1,1,ithd),mexpp2(1,1,ithd),
+     9         mexppall(1,1,1,ithd),rdplus,rdminus,
+     9         xshift,yshift,zshift,rlsc,rscpow,fexpback,nn)
+              ! rmlexp gets updated
+              if (ibox.eq.2) then
+                 open(1, file = 'mps_data.dat')
+                 do j=1,lmptottmp  
+                   write(1,*) rmlexp(j)
+                 enddo
+                close(1)        
+              end if
+
+    !           call getpwlistallprocessudnsewexp0(ibox,boxsize(ilev),
+    !  1         nboxes,itree(ipointer(6)+ibox-1),
+    !  2         itree(ipointer(7)+mnbors*(ibox-1)),
+    !  3         nchild,itree(ipointer(5)),treecenters,
+    !  4         isep,nd,ilev,scales(ilev),nterms(ilev),iaddrtmp,
+    !  5         rmlexp,lmptottmp,
+    !  6         rlams,whts,nlams,nfourier,nphysical,
+    !  7         nthmax,nexptot,nexptotp,mexp,
+    !  8         mexpf1(1,1,ithd),mexpf2(1,1,ithd),
+    !  9         mexpp1(1,1,ithd),mexpp2(1,1,ithd),
+    !  9         mexppall(1,1,1,ithd),rdplus,rdminus,
+    !  9         xshift,yshift,zshift,fexpback,nn,rlsc,rscpow,
+    !  9         pgboxwexp,cntlist4,list4ct,nlist4,list4,mnlist4) 
+              
 
            endif
            if(nlist3(ibox).gt.0.and.npts.gt.0) then
