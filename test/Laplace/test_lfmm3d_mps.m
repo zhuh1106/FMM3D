@@ -569,8 +569,7 @@
        iboxisort_tmp=zeros(nmaxt,nthd);
 
 %!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-%! from here on is for testing purpose
-     ilev=2;
+     ilev = 2;
        iboxlexp=zeros(nd*(nterms(ilev)+1)*(2*nterms(ilev)+1),8,nthd);
        rscpow(1) = 1.0d0/boxsize(ilev+1);
        rtmp = scales(ilev+1)/boxsize(ilev+1);
@@ -629,6 +628,8 @@
          end
        end
 %        rmlexp_f=importdata('mps_data.dat');
+       mexpf12(:,:,1) = mexpf1(:,:,ithd);
+       mexpf12(:,:,2) = mexpf2(:,:,ithd);
 
        nuall=0; ndall=0; nnall=0; nsall=0; neall=0; nwall=0; 
        nu1234=0; nd5678=0; nn1256=0; ns3478=0; ne1357=0; nw2468=0; 
@@ -650,11 +651,9 @@
          if((npts>0)&&(nchild>0))
            nborsi = itree((ipointer(7)+mnbors*(ibox-1)):(ipointer(7)+mnbors*(ibox-1)-1+itree(ipointer(6)+ibox-1)));
            ichildi = itree(ipointer(5):(ipointer(5)-1+8*nboxes));
-           if ibox == 2
-             mexpf12(:,:,1) = mexpf1(:,:,ithd);
-             mexpf12(:,:,2) = mexpf2(:,:,ithd);
+           
              %%% next we will update rmlexp, mex subroutine getpwlistallprocessudnsewexp0
-             rmlexp_new = getpwlistallprocessudnsewexp0_mex(ibox,boxsize(ilev+1),...
+             rmlexp = getpwlistallprocessudnsewexp0_mex(ibox,boxsize(ilev+1),...
               nboxes,itree(ipointer(6)+ibox-1),...
               nborsi,...
               nchild,ichildi,treecenters,...
@@ -668,41 +667,14 @@
               pgboxwexp,cntlist4,list4ct,nlist4,list4,mnlist4);           
               %%% this is not done yet... need to be more careful...
               %%% only checked one step updated rmlexp...
-               keyboard
+              %% it turns out "cntlist4,list4ct,nlist4,list4,mnlist4" are needed for case say n1 = 7
 
-           end
-           % below fails for some reason, error message: Identifier should be a string ?
-%            getpwlistall0_mex(ibox,boxsize(ilev+1),nboxes,...
-%               itree(ipointer(6)+ibox-1),nborsi,...
-%               nchild,ichildi,treecenters,...
-%               isep,nuall,uall(:,ithd),ndall,dall(:,ithd),...
-%               nnall,nall(:,ithd),nsall,sall(:,ithd),...
-%               neall,eall(:,ithd),nwall,wall(:,ithd),...
-%               nu1234,u1234(:,ithd),nd5678,d5678(:,ithd),...
-%               nn1256,n1256(:,ithd),ns3478,s3478(:,ithd),...
-%               ne1357,e1357(:,ithd),nw2468,w2468(:,ithd),...
-%               nn12,n12(:,ithd),nn56,n56(:,ithd),ns34,s34(:,ithd),...
-%               ns78,s78(:,ithd),ne13,e13(:,ithd),ne57,e57(:,ithd),...
-%               nw24,w24(:,ithd),nw68,w68(:,ithd),ne1,e1(:,ithd),...
-%               ne3,e3(:,ithd),ne5,e5(:,ithd),ne7,e7(:,ithd),...
-%               nw2,w2(:,ithd),nw4,w4(:,ithd),nw6,w6(:,ithd),...
-%               nw8,w8(:,ithd));
-%            keyboard
-
-%            uall=zeros(200,nthd); dall=zeros(200,nthd); nall=zeros(120,nthd); sall=zeros(120,nthd);
-%            eall=zeros(72,nthd); wall=zeros(72,nthd);
-%            u1234=zeros(36,nthd); d5678=zeros(36,nthd); 
-%            n1256=zeros(24,nthd); s3478=zeros(24,nthd);
-%            e1357=zeros(16,nthd); w2468=zeros(16,nthd); 
-%            n12=zeros(20,nthd); n56=zeros(20,nthd); s34=zeros(20,nthd); s78=zeros(20,nthd);
-%            e13=zeros(20,nthd); e57=zeros(20,nthd); w24=zeros(20,nthd); w68=zeros(20,nthd);
-%            e1=zeros(5,nthd); e3=zeros(5,nthd); e5=zeros(5,nthd); e7=zeros(5,nthd);
-%            w2=zeros(5,nthd); w4=zeros(5,nthd); w6=zeros(5,nthd); w8=zeros(5,nthd);
-%            iboxsubcenters=zeros(3,8,nthd);
-%            iboxfl=zeros(2,8,nthd);
+              %% it also turns out nlist3(ibox) gt 0 is also processed in this case, so more work needs to be done...
 
          end
        end
+
+       
        keyboard
 
        

@@ -29,7 +29,7 @@ c
       implicit real *8 (a-h,o-z)
       real *8 ztrg(3),sources(3,10)
       real *8 ztrgs(3,2)
-	  real *8 c0(3),c1(3),c2(3),c3(3)
+	    real *8 c0(3),c1(3),c2(3),c3(3)
       real *8 xnodes(2000),wts(2000)
       real *8, allocatable :: dc(:,:)
 c

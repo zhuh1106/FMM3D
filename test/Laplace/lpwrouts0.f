@@ -23,7 +23,7 @@ c-------------------------------------------------------------------
       integer nd, ilev, nterms, nlams, nthmax, nexptot, nexptotp, nn
       integer nfourier(nlams), nphysical(nlams)
       integer iaddrtmp(2,nboxes)
-      integer *8 iaddr(2,nboxes)
+      integer iaddr(2,nboxes)
       integer lmptottmp
       double precision rscale
       double precision rmlexp(lmptottmp),rlams(nlams),whts(nlams)
@@ -177,7 +177,7 @@ c-------------------------------------------------------------------
       integer nd, ilev, nterms, nlams, nthmax, nexptot, nexptotp, nn
       integer nfourier(nlams), nphysical(nlams)
       integer iaddrtmp(2,nboxes)
-      integer *8 iaddr(2,nboxes)
+      integer iaddr(2,nboxes)
       integer lmptottmp
       double precision rscale
       double precision rmlexp(lmptottmp),rlams(nlams),whts(nlams)
@@ -558,7 +558,7 @@ c-------------------------------------------------------------------
       integer idim,nd
       integer ibox,ilev,nboxes,nterms,nlams,nthmax
       integer nphysical(nlams),nfourier(nlams)
-      integer *8 iaddr(2,nboxes)
+      integer iaddr(2,nboxes)
       integer ichild(8,nboxes)
       integer nexptot,nexptotp,nmax
       integer nuall,ndall,nu1234,nd5678
@@ -989,7 +989,7 @@ c-------------------------------------------------------------------
       integer nd
       integer ibox,ilev,nboxes,nterms,nlams,nthmax
       integer nphysical(nlams),nfourier(nlams)
-      integer *8 iaddr(2,nboxes)
+      integer iaddr(2,nboxes)
       integer ichild(8,nboxes)
       integer nexptot,nexptotp,nmax
       integer nnall,nsall,nn1256,ns3478,nn12,nn56,ns34,ns78
@@ -1502,7 +1502,7 @@ c-------------------------------------------------------------------
       integer nd
       integer ibox,ilev,nboxes,nterms,nlams,nthmax
       integer nphysical(nlams),nfourier(nlams)
-      integer *8 iaddr(2,nboxes)
+      integer iaddr(2,nboxes)
       integer ichild(8,nboxes)
       integer nexptot,nexptotp,nmax
       integer neall,nwall,ne1357,nw2468,ne13,ne57,nw24,nw68
