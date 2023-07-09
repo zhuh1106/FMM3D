@@ -111,7 +111,7 @@
        mterms=zeros(nmpole,1);
        impole=zeros(nmpole,1);
       
-       ntm = 7;
+       ntm = 10;
        ntot = 0;
        for i = 1:nmpole
          mterms(i) = ntm;
@@ -149,10 +149,12 @@
 
        for i = 1:nmpole
          rmpole(i) = rscale;
-         mpoletmp =  l3dformmpc_mex(nd, rscale, source(:,i), charge(:,i), ns1, cmpole(:,i), mterms(i), mpole(impole(i):impole(i)+nd*(mterms(i)+1)*(2*mterms(i)+1)-1),wlege, nlege);
-         mpole(impole(i):impole(i)+nd*(mterms(i)+1)*(2*mterms(i)+1)-1) = mpoletmp(:);
+         mpoletmp = zeros(nd,mterms(i)+1,2*mterms(i)+1);
+         mpoletmp =  l3dformmpc_mex(nd, rscale, source(:,i), charge(:,i), ns1, cmpole(:,i), mterms(i), mpoletmp,wlege, nlege);
+         mpole(impole(i):impole(i)+nd*(mterms(i)+1)*(2*mterms(i)+1)-1) = mpole(impole(i):impole(i)+nd*(mterms(i)+1)*(2*mterms(i)+1)-1) + mpoletmp(:);
 %          keyboard
        end
+       %%% there is a 1e-32 difference in mpole between matlab mex and fortran...
 
 %      do the direct calculation
        thresh = 1.0d-15;
@@ -441,6 +443,7 @@
            end
          end
        end
+%        list4ct_f=importdata('mps_data.dat');
        gboxind=zeros(nmaxt,nthd);
        gboxisort=zeros(nmaxt,nthd);
        gboxisort_tmp=zeros(nmaxt,nthd);
@@ -451,16 +454,119 @@
        for ilev=1:nlevels-1
          rscpow(1) = 1.0d0/boxsize(ilev+2); % only used inside if(list4ct(ibox)>0)
          rtmp = scales(ilev+2)/boxsize(ilev+2);
-         for i=1:nterms(ilev+2), rscpow(i+1) = rscpow(i)*rtmp; end
-         for ibox=laddr(1,ilev+1),laddr(2,ilev+1)
-            ithd = 0; ithd = ithd + 1;
+         for i=1:nterms(ilev+2) 
+           rscpow(i+1) = rscpow(i)*rtmp; 
+         end
+         for ibox=laddr(1,ilev+1):laddr(2,ilev+1)
+            ithd = 0; 
+            ithd = ithd + 1;
             if(list4ct(ibox)>0)
-              istart=isrcse(1,ibox); iend=isrcse(2,ibox); npts = iend-istart+1;
+              disp(['list4ct is accessed']);
+              disp(['this is ilev = ' num2str(ilev) ' ']);
+              disp(['this is ibox = ' num2str(ibox) ' ']);
+              istart=isrcse(1,ibox); 
+              iend=isrcse(2,ibox); 
+              npts = iend-istart+1;
               % line 709 onwards
-              if(npts>0), keyboard; end
+              if(npts>0)
+                gboxindi = gboxind(:,ithd);
+                gboxfli = gboxfl(:,:,ithd);
+                gboxsubcentersi = gboxsubcenters(:,:,ithd);
+                [gboxind(:,ithd),gboxfl(:,:,ithd),gboxsubcenters(:,:,ithd)] = ...
+                    subdividebox_mex(cmpolesort(:,istart),npts,treecenters(:,ibox),boxsize(ilev+2),gboxindi,gboxfli,gboxsubcentersi);
+                for i=istart:iend
+                  gboxisort_tmp(i-istart+1,ithd) = i;
+                end
+                gboxisort_tmpi = gboxisort_tmp(:,ithd);
+                gboxisorti = gboxisort(:,ithd);
+                gboxindi = gboxind(:,ithd);
+                gboxisort(:,ithd) = ireorderf_mex(1, npts, gboxisort_tmpi', gboxisorti', gboxindi)';
+                for i=1:8
+                  if (gboxfl(1,i,ithd)>0)
+                    jstart=gboxfl(1,i,ithd);
+                    jend=gboxfl(2,i,ithd);
+                    npts0=jend-jstart+1;
+                    jbox=list4ct(ibox);
+                    for j = jstart:jend % seems like there is always 1 ghost box, why is this the case?
+                      k = gboxisort(j,ithd);
+                      gboxmexpi = zeros(nd,nterms(ilev+2)+1,2*nterms(ilev+2)+1);
+                      gboxmexpi = l3dmpmp_mex(nd,rmpolesort(k),cmpolesort(:,k),...
+                          mpolesort(impolesort(k):(impolesort(k)+nd*(mtermssort(k)+1)*(2*mtermssort(k)+1)-1)),mtermssort(k),...
+                          scales(ilev+2),gboxsubcenters(:,i,ithd),...
+                          gboxmexpi,nterms(ilev+2),dc,lca);
+                      gboxmexp(:,i,jbox) = gboxmexp(:,i,jbox) + gboxmexpi(:);
+                    end
+                    % fortran line 744, from gboxmexp to rmlexp(real).... 
+                    cmlexpi = zeros(nd,nterms(ilev+1)+1,2*nterms(ilev+1)+1);
+                    cmlexpi = l3dmpmp_mex(nd,scales(ilev+2),...
+                        gboxsubcenters(:,i,ithd),gboxmexp(:,i,jbox),...
+                       nterms(ilev+2),scales(ilev+1),treecenters(:,ibox),...
+                        cmlexpi,nterms(ilev+1),dc,lca);
+                    %%% here pay attention to the variable type, is it real or complex...
+                    tmpidx = 1:2*(nd*(nterms(ilev+1)+1)*(2*nterms(ilev+1)+1));
+                    rmlexp(iaddr(1,ibox)-1+tmpidx) = rmlexp(iaddr(1,ibox)-1+tmpidx) + reshape([real(cmlexpi(:)),imag(cmlexpi(:))]',[],1); 
+                    %  rescale the multipole expansion, tmp is complex
+                    cmlexpi = reshape(gboxmexp(:,i,jbox),nd,nterms(ilev+1)+1,2*nterms(ilev+1)+1);
+                    tmpi = zeros(size(cmlexpi));
+                    tmp(:,:,:,ithd) = mpscale_mex(nd,nterms(ilev+1),cmlexpi,rscpow,tmpi);
+                    %
+                    %cc        process up down for current box
+                    mexpupf = zeros(nd,nexptot); mexpdownf = zeros(nd,nexptot);
+                    [mexpupf,mexpdownf] = mpoletoexp_mex(nd,tmp(:,:,:,ithd),nterms(ilev+2),nlams,nfourier,...
+                            nexptot,mexpupf,mexpdownf,rlsc);
+                    mexpf1(:,:,ithd) = mexpupf; mexpf2(:,:,ithd) = mexpdownf;
+                    gboxwexp(:,:,1,i,ithd) = ftophys_mex(nd,mexpf1(:,:,ithd),nlams,rlams,nfourier,...
+                            nphysical,nthmax,gboxwexp(:,:,1,i,ithd),fexpe,fexpo); % mexp is cumulative inside ftophys
+                    gboxwexp(:,:,2,i,ithd) = ftophys_mex(nd,mexpf2(:,:,ithd),nlams,rlams,nfourier,...
+                            nphysical,nthmax,gboxwexp(:,:,2,i,ithd),fexpe,fexpo);
+                    [pgboxwexp(:,:,jbox,1),pgboxwexp(:,:,jbox,2)] = processgboxudexp_mex(nd,gboxwexp(:,:,1,i,ithd),gboxwexp(:,:,2,i,ithd),i,nexptotp,...
+                            pgboxwexp(:,:,jbox,1),pgboxwexp(:,:,jbox,2),xshift,yshift,zshift);
+                    %
+                    %cc        process north-south for current box
+                    cmptmpi = zeros(nd,(nterms(ilev+2)+1),(2*nterms(ilev+2)+1));
+                    cmptmpi = rotztoy_mex(nd,nterms(ilev+2),tmp(:,:,:,ithd),cmptmpi,rdminus);
+                    cmptmpi = cmptmpi(:);
+                    mptmp(:,ithd) = reshape([real(cmptmpi) imag(cmptmpi)]',[],1); % 
+                    mexpupf = zeros(nd,nexptot); mexpdownf = zeros(nd,nexptot);
+                    [mexpupf,mexpdownf] = mpoletoexp_mex(nd,cmptmpi,nterms(ilev+2),nlams,nfourier,...
+                            nexptot,mexpupf,mexpdownf,rlsc);
+                    mexpf1(:,:,ithd) = mexpupf; mexpf2(:,:,ithd) = mexpdownf;
+                    gboxwexp(:,:,3,i,ithd) = ftophys_mex(nd,mexpf1(:,:,ithd),nlams,rlams,nfourier,...
+                            nphysical,nthmax,gboxwexp(:,:,3,i,ithd),fexpe,fexpo);
+                    gboxwexp(:,:,4,i,ithd) = ftophys_mex(nd,mexpf2(:,:,ithd),nlams,rlams,nfourier,...
+                            nphysical,nthmax,gboxwexp(:,:,4,i,ithd),fexpe,fexpo);
+                    [pgboxwexp(:,:,jbox,3),pgboxwexp(:,:,jbox,4)] = processgboxudexp_mex(nd,gboxwexp(:,:,3,i,ithd),gboxwexp(:,:,4,i,ithd),i,nexptotp,...
+                            pgboxwexp(:,:,jbox,3),pgboxwexp(:,:,jbox,4),xshift,yshift,zshift);
+                    %
+                    %cc        process east-west for current box  
+                    cmptmpi = zeros(nd,(nterms(ilev+2)+1),(2*nterms(ilev+2)+1));
+                    cmptmpi = rotztox_mex(nd,nterms(ilev+2),tmp(:,:,:,ithd),cmptmpi,rdplus);
+                    cmptmpi = cmptmpi(:);
+                    mptmp(:,ithd) = reshape([real(cmptmpi) imag(cmptmpi)]',[],1);
+                    mexpupf = zeros(nd,nexptot); mexpdownf = zeros(nd,nexptot);
+                    [mexpupf,mexpdownf] = mpoletoexp_mex(nd,cmptmpi,nterms(ilev+2),nlams,nfourier,...
+                            nexptot,mexpupf,mexpdownf,rlsc);
+                    mexpf1(:,:,ithd) = mexpupf; mexpf2(:,:,ithd) = mexpdownf;
+                    gboxwexp(:,:,5,i,ithd) = ftophys_mex(nd,mexpf1(:,:,ithd),nlams,rlams,nfourier,...
+                            nphysical,nthmax,gboxwexp(:,:,5,i,ithd),fexpe,fexpo);
+                    gboxwexp(:,:,6,i,ithd) = ftophys_mex(nd,mexpf2(:,:,ithd),nlams,rlams,nfourier,...
+                            nphysical,nthmax,gboxwexp(:,:,6,i,ithd),fexpe,fexpo);
+                    [pgboxwexp(:,:,jbox,5),pgboxwexp(:,:,jbox,6)] = processgboxudexp_mex(nd,gboxwexp(:,:,5,i,ithd),gboxwexp(:,:,6,i,ithd),i,nexptotp,...
+                            pgboxwexp(:,:,jbox,5),pgboxwexp(:,:,jbox,6),xshift,yshift,zshift);
+                    
+                  end
+                end
+              end
             end
          end
        end
+%        rmpolesort_f=importdata('mps_data.dat'); % this checks out
+%        mpolesort_f=importdata('mps_data.dat');
+%        gboxmexp_f=importdata('mps_data.dat'); % this has 1e-17 difference?
+%        rmlexp_f=importdata('mps_data.dat');
+%        tmp_f=importdata('mps_data.dat');
+%        pgboxwexp_f=importdata('mps_data.dat');
+
        clear gboxfl gboxsubcenters gboxwexp
        clear gboxind gboxisort_tmp gboxisort gboxmexp
 %cccccc
@@ -486,7 +592,7 @@
                    cmlexpi,nterms(ilev+1),dc,lca); % be careful with scales, nterms
                %%% here pay attention to the variable type, is it real or complex...
                tmpidx = 1:2*(nd*(nterms(ilev+1)+1)*(2*nterms(ilev+1)+1));
-               rmlexp(iaddr(1,ibox)-1+tmpidx) = reshape([real(cmlexpi(:)),imag(cmlexpi(:))]',[],1);
+               rmlexp(iaddr(1,ibox)-1+tmpidx) = rmlexp(iaddr(1,ibox)-1+tmpidx) + reshape([real(cmlexpi(:)),imag(cmlexpi(:))]',[],1);
              end
            end
          end         
@@ -653,6 +759,19 @@
            ichildi = itree(ipointer(5):(ipointer(5)-1+8*nboxes));
            
              %%% next we will update rmlexp, mex subroutine getpwlistallprocessudnsewexp0
+%              rmlexp = getpwlistallprocessudnsewexp02_mex(ibox,boxsize(ilev+1),...
+%               nboxes,itree(ipointer(6)+ibox-1),...
+%               nborsi,...
+%               nchild,ichildi,treecenters,...
+%               isep,nd,ilev,scales(ilev+1),nterms(ilev+1),iaddr,...
+%               rmlexp,lmptot,...
+%               rlams,whts,nlams,nfourier,nphysical,...
+%               nthmax,nexptot,nexptotp,mexp,mexpf12,...
+%               mexpp1(:,:,ithd),mexpp2(:,:,ithd),...
+%               mexppall(:,:,:,ithd),rdplus,rdminus,...
+%               xshift,yshift,zshift,fexpback,nn,rlsc,rscpow,...
+%               pgboxwexp,cntlist4,list4ct,nlist4,list4,mnlist4); 
+
              rmlexp = getpwlistallprocessudnsewexp0_mex(ibox,boxsize(ilev+1),...
               nboxes,itree(ipointer(6)+ibox-1),...
               nborsi,...
@@ -660,11 +779,12 @@
               isep,nd,ilev,scales(ilev+1),nterms(ilev+1),iaddr,...
               rmlexp,lmptot,...
               rlams,whts,nlams,nfourier,nphysical,...
-              nthmax,nexptot,nexptotp,mexp,mexpf12,...
+              nthmax,nexptot,nexptotp,mexp,mexpf1(:,:,ithd),mexpf2(:,:,ithd),...
               mexpp1(:,:,ithd),mexpp2(:,:,ithd),...
               mexppall(:,:,:,ithd),rdplus,rdminus,...
               xshift,yshift,zshift,fexpback,nn,rlsc,rscpow,...
-              pgboxwexp,cntlist4,list4ct,nlist4,list4,mnlist4);           
+              pgboxwexp,cntlist4,list4ct,nlist4,list4,mnlist4); 
+             
               %%% this is not done yet... need to be more careful...
               %%% only checked one step updated rmlexp...
               %% it turns out "cntlist4,list4ct,nlist4,list4,mnlist4" are needed for case say n1 = 7
