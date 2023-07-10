@@ -30,7 +30,7 @@
        nd = 1;
       
       
-       n1 = 4;
+       n1 = 9;
        ns = n1^3;
        nmpole = ns;
       
@@ -461,9 +461,9 @@
             ithd = 0; 
             ithd = ithd + 1;
             if(list4ct(ibox)>0)
-              disp(['list4ct is accessed']);
-              disp(['this is ilev = ' num2str(ilev) ' ']);
-              disp(['this is ibox = ' num2str(ibox) ' ']);
+%               disp(['list4ct is accessed']);
+%               disp(['this is ilev = ' num2str(ilev) ' ']);
+%               disp(['this is ibox = ' num2str(ibox) ' ']);
               istart=isrcse(1,ibox); 
               iend=isrcse(2,ibox); 
               npts = iend-istart+1;
@@ -675,7 +675,8 @@
        iboxisort_tmp=zeros(nmaxt,nthd);
 
 %!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-     ilev = 2;
+     for ilev = 2:nlevels
+%      ilev = 2;
        iboxlexp=zeros(nd*(nterms(ilev)+1)*(2*nterms(ilev)+1),8,nthd);
        rscpow(1) = 1.0d0/boxsize(ilev+1);
        rtmp = scales(ilev+1)/boxsize(ilev+1);
@@ -755,24 +756,11 @@
          iend = isrcse(2,ibox);
          npts = npts + iend-istart+1;
          if((npts>0)&&(nchild>0))
+           % if(npts.gt.0.and.nchild.gt.0) then call getpwlistallprocessudnsewexp0
            nborsi = itree((ipointer(7)+mnbors*(ibox-1)):(ipointer(7)+mnbors*(ibox-1)-1+itree(ipointer(6)+ibox-1)));
            ichildi = itree(ipointer(5):(ipointer(5)-1+8*nboxes));
            
-             %%% next we will update rmlexp, mex subroutine getpwlistallprocessudnsewexp0
-%              rmlexp = getpwlistallprocessudnsewexp02_mex(ibox,boxsize(ilev+1),...
-%               nboxes,itree(ipointer(6)+ibox-1),...
-%               nborsi,...
-%               nchild,ichildi,treecenters,...
-%               isep,nd,ilev,scales(ilev+1),nterms(ilev+1),iaddr,...
-%               rmlexp,lmptot,...
-%               rlams,whts,nlams,nfourier,nphysical,...
-%               nthmax,nexptot,nexptotp,mexp,mexpf12,...
-%               mexpp1(:,:,ithd),mexpp2(:,:,ithd),...
-%               mexppall(:,:,:,ithd),rdplus,rdminus,...
-%               xshift,yshift,zshift,fexpback,nn,rlsc,rscpow,...
-%               pgboxwexp,cntlist4,list4ct,nlist4,list4,mnlist4); 
-
-             rmlexp = getpwlistallprocessudnsewexp0_mex(ibox,boxsize(ilev+1),...
+           rmlexp = getpwlistallprocessudnsewexp0_mex(ibox,boxsize(ilev+1),...
               nboxes,itree(ipointer(6)+ibox-1),...
               nborsi,...
               nchild,ichildi,treecenters,...
@@ -784,18 +772,71 @@
               mexppall(:,:,:,ithd),rdplus,rdminus,...
               xshift,yshift,zshift,fexpback,nn,rlsc,rscpow,...
               pgboxwexp,cntlist4,list4ct,nlist4,list4,mnlist4); 
-             
-              %%% this is not done yet... need to be more careful...
-              %%% only checked one step updated rmlexp...
-              %% it turns out "cntlist4,list4ct,nlist4,list4,mnlist4" are needed for case say n1 = 7
-
-              %% it also turns out nlist3(ibox) gt 0 is also processed in this case, so more work needs to be done...
-
+         end
+         if((nlist3(ibox)>0)&&(npts>0)) 
+           disp(['this is actually processed...']);  
+           for i=1:8
+              iboxlexp(:,i,ithd) = 0;
+           end
+           iboxlexp(:,:,ithd) = getlist3pwallprocessudnsewexp0_mex(ibox,boxsize(ilev+1),...
+                 nboxes,nlist3(ibox),list3(1:nlist3(ibox),ibox),...
+                 isep,treecenters,nd,...
+                 nterms(ilev+1),iboxlexp(:,:,ithd),rlams,...
+                 whts,nlams,nfourier,nphysical,nthmax,...
+                 nexptot,nexptotp,mexp,...
+                 mexpf1(:,:,ithd),mexpf2(:,:,ithd),...
+                 mexpp1(:,:,ithd),mexpp2(:,:,ithd),...
+                 mexppall(:,:,1,ithd),mexppall(:,:,2,ithd),...
+                 xshift,yshift,zshift,fexpback,nn,rlsc,rscpow,...
+                 rdplus,rdminus);
+           
+           istart = isrcse(1,ibox);
+           iend = isrcse(2,ibox);
+           npts = iend-istart+1;
+           if(npts>0) 
+             iboxsrcindi = iboxsrcind(:,ithd);
+             iboxfli = iboxfl(:,:,ithd);
+             iboxsubcentersi = iboxsubcenters(:,:,ithd);
+             [iboxsrcind(:,ithd),iboxfl(:,:,ithd),iboxsubcenters(:,:,ithd)] = ...
+                  subdividebox_mex(cmpolesort(:,istart),npts,treecenters(:,ibox),boxsize(ilev+1),iboxsrcindi,iboxfli,iboxsubcentersi);
+             for i=istart:iend
+                 iboxisort_tmp(i-istart+1,ithd) = i;
+             end
+             iboxisort_tmpi = iboxisort_tmp(:,ithd);
+             iboxisorti = iboxisort(:,ithd);
+             iboxsrcindi = iboxsrcind(:,ithd);
+             iboxisort(:,ithd) = ireorderf_mex(1,npts,iboxisort_tmpi',iboxisorti',iboxsrcindi)';
+             for i=1:8
+               if(iboxfl(1,i,ithd)>0) 
+                 jstart=iboxfl(1,i,ithd);
+                 jend=iboxfl(2,i,ithd);
+                 npts0=jend-jstart+1;
+                 for j = jstart:jend
+                   k = iboxisort(j,ithd);
+                   localsortj = localsort(impolesort(k):(impolesort(k)-1+nd*(mtermssort(k)+1)*(2*mtermssort(k)+1)));
+                   localsortj = l3dlocloc_mex(nd,scales(ilev+1),...
+                         iboxsubcenters(:,i,ithd),iboxlexp(:,i,ithd),...
+                         nterms(ilev+1),...
+                         rmpolesort(k),cmpolesort(:,k),...
+                         localsortj, mtermssort(k),...
+                         dc,lca);
+                   localsort(impolesort(k):(impolesort(k)-1+nd*(mtermssort(k)+1)*(2*mtermssort(k)+1))) = localsortj(:);
+                 end
+               end
+             end
+                
+%              keyboard
+           end
          end
        end
 
-       
-       keyboard
+%        
+%        iboxlexp_f=importdata('mps_data.dat');
+
+     end
+%     localsort_f=importdata('mps_data.dat'); % localsort check...
+%     rmlexp_f=importdata('mps_data.dat'); % rmlexp check...
+     keyboard
 
        
 

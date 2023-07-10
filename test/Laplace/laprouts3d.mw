@@ -377,3 +377,19 @@ end
 @function [mexpuall,mexpdall] = processgboxudexp_mex(nd,mexpugbox,mexpdgbox,jbox,nexptotp,mexpuall,mexpdall,xs,ys,zs)
 # FORTRAN processgboxudexp(int[1] nd, dcomplex[nd,nexptotp] mexpugbox, dcomplex[nd,nexptotp] mexpdgbox, int[1] jbox, int[1] nexptotp, inout dcomplex[nd,nexptotp] mexpuall, inout dcomplex[nd,nexptotp] mexpdall, dcomplex[11,nexptotp] xs, dcomplex[11,nexptotp] ys, double[5,nexptotp] zs);
 end
+
+@function rmlexp = getlist3pwallprocessudnsewexp0_mex(ibox,bs,nboxes,nlist3,list3,isep,centers,nd,nterms,rmlexp,rlams,whts,nlams,nfourier,nphysical,nthmax,nexptot,nexptotp,mexp,mexpup,mexpdown,mexpupphys,mexpdownphys,mexppall1,mexppall2,xs,ys,zs,fexpback,nn,rlsc,rscpow,rdplus,rdminus)
+nboxes6=nboxes*6;
+ndnexptotp=nd*nexptotp;
+mexp=reshape(mexp,ndnexptotp,nboxes6);
+ndnterms1t2nterms1 = nd*(nterms+1)*(2*nterms+1);
+nterms1 = nterms+1;
+nterms1s = nterms1^2;
+nterms2p1 = nterms*2+1; 
+rdplus = reshape(rdplus,nterms1s,nterms2p1);
+rdminus = reshape(rdminus,nterms1s,nterms2p1);
+rlsc = reshape(rlsc,nterms1s,nlams); 
+# FORTRAN getlist3pwallprocessudnsewexp0(int[1] ibox, double[1] bs, int[1] nboxes, int[1] nlist3, int[nlist3] list3, int[1] isep, double[3,nboxes] centers, int[1] nd, int[1] nterms, inout dcomplex[ndnterms1t2nterms1,8] rmlexp, double[nlams] rlams, double[nlams] whts, int[1] nlams, int[nlams] nfourier, int[nlams] nphysical, int[1] nthmax, int[1] nexptot, int[1] nexptotp, dcomplex[ndnexptotp,nboxes6] mexp, dcomplex[nd,nexptot] mexpup, dcomplex[nd,nexptot] mexpdown, dcomplex[nd,nexptotp] mexpupphys, dcomplex[nd,nexptotp] mexpdownphys, dcomplex[nd,nexptotp] mexppall1, dcomplex[nd,nexptotp] mexppall2, dcomplex[11,nexptotp] xs, dcomplex[11,nexptotp] ys, double[5,nexptotp] zs, dcomplex[nn] fexpback, int[1] nn, double[nterms1s,nlams] rlsc, double[nterms1] rscpow, double[nterms1s,nterms2p1] rdplus, double[nterms1s,nterms2p1] rdminus);
+% getlist3pwallprocessudnsewexp0(               ibox,           bs,        nboxes,        nlist3,             list3,        isep,                  centers,        nd,        nterms,                                      rmlexp,               rlams,               whts,        nlams,            nfourier,            nphysical,        nthmax,        nexptot,        nexptotp,                              mexp,                      mexpup,                      mexpdown,                       mexpupphys,                       mexpdownphys,                       mexppall1,                       mexppall2,                       xs,                       ys,                    zs,              fexpback,        nn,                        rlsc,                 rscpow,                            rdplus,                            rdminus);
+rmlexp; % reshape?
+end

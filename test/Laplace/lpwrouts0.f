@@ -1,16 +1,16 @@
 c----------------------------------------------------------------
 c----- to hide a few variables... right now has more...
-      subroutine getlist3pwallprocessudnsewexp0(
-     1           ibox,bs,nboxes,nlist3,list3,
-     2           isep,centers,nuall,uall,ndall,dall,nnall,
-     3           nall,nsall,sall,neall,eall,nwall,wall,
-     4           nd,
-     1           nterms,rmlexp,rlams,whts,nlams,nfourier,
-     2           nphysical,nthmax,nexptot,nexptotp,mexp,
-     3           mexpup,mexpdown,
-     4           mexpupphys,mexpdownphys,mexppall1,mexppall2,
-     5           xs,ys,zs,fexpback,rlsc,rscpow,
-     6           rdplus,rdminus)
+      subroutine getlist3pwallprocessudnsewexp0(ibox,bs,
+     1           nboxes,nlist3,list3,
+     2           isep,centers,nd,
+     3           nterms,rmlexp,rlams,
+     4           whts,nlams,nfourier,nphysical,nthmax,
+     5           nexptot,nexptotp,mexp,
+     6           mexpup,mexpdown,
+     7           mexpupphys,mexpdownphys,
+     8           mexppall1,mexppall2,
+     9           xs,ys,zs,fexpback,nn,rlsc,rscpow,
+     9           rdplus,rdminus)
 
 c-------------------------------------------------------------------
       implicit none
@@ -20,17 +20,19 @@ c-------------------------------------------------------------------
       double precision centers(3,nboxes)
       double precision sepdist,bs
       integer nuall,ndall,nnall,nsall,neall,nwall
-      integer uall(1),dall(1),nall(1),sall(1),eall(1),wall(1)
+      integer uall(200),dall(200)
+      integer nall(120),sall(120)
+      integer eall(72),wall(72)
 
       integer jbox
       integer c1,c2,c3,c4,c5,c6
       integer j
 
-      integer idim,nd
+      integer idim,nd,nn
       integer nterms,nlams,nthmax
       integer nphysical(nlams),nfourier(nlams)
       integer nexptot,nexptotp
-      double precision rlams(*),whts(*)
+      double precision rlams(nlams),whts(nlams)
       double complex, allocatable :: tloc(:,:,:)  
       double complex mexp(nd,nexptotp,nboxes,6)
       double complex rmlexp(nd*(nterms+1)*(2*nterms+1),8)
@@ -40,7 +42,7 @@ c-------------------------------------------------------------------
       double complex xs(-5:5,nexptotp),ys(-5:5,nexptotp)
       double precision zs(5,nexptotp)
       double precision rlsc(0:nterms,0:nterms,nlams),rscpow(0:nterms)
-      double complex fexpback(*)
+      double complex fexpback(nn)
 c     additional 
       double precision rdplus(0:nterms,0:nterms,-nterms:nterms)
       double precision rdminus(0:nterms,0:nterms,-nterms:nterms)
@@ -54,10 +56,10 @@ c      temp variables
 
       call getlist3pwlistall0(ibox,bs,nboxes,
      1            nlist3,list3,isep,
-     2            centers,nuall,uall(1),ndall,dall(1),
-     3            nnall,nall(1),
-     4            nsall,sall(1),neall,eall(1),
-     5            nwall,wall(1))
+     2            centers,nuall,uall,ndall,dall,
+     3            nnall,nall,
+     4            nsall,sall,neall,eall,
+     5            nwall,wall)
       
       call processlist3udexplong0(nd,ibox,nboxes,centers,
      1           bs,nterms,rmlexp,rlams,whts,nlams,nfourier,
@@ -95,7 +97,9 @@ c-------------------------------------------------------------------
       double precision centers(3,nboxes)
       double precision sepdist,bs
       integer nuall,ndall,nnall,nsall,neall,nwall
-      integer uall(1),dall(1),nall(1),sall(1),eall(1),wall(1)
+      integer uall(200),dall(200)
+      integer nall(120),sall(120)
+      integer eall(72),wall(72)
 
       integer jbox
       integer c1,c2,c3,c4,c5,c6
