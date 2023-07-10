@@ -183,7 +183,7 @@
        disp(['output: local expansions ']);
 
 %%%%%% mps call       
-       local = lfmm3d_mps0_mex(nd, eps, nmpole, cmpole, rmpole, mterms, mpole, impole, local, ier);
+%        local = lfmm3d_mps0_mex(nd, eps, nmpole, cmpole, rmpole, mterms, mpole, impole, local, ier);
        % call lfmm3dmps0(nd, eps, nmpole, cmpole, rmpole, mterms, mpole, impole, local, ier)
        disp(['ndiv still needs to be optimized ']);
        ndiv = 1;
@@ -935,23 +935,24 @@
          end
        end
      end
+% localsort_f = importdata('mps_data.dat');
 
-     keyboard
-
-%    boxsize(0:nlevels)
-%    nterms(0:nlevels)
-%    scales(0:nlevels)
-%    laddr(2,0:nlevels)
-%    rscpow(0:nmax)
-%    dc(0:4*nmax,0:4*nmax)
-%    rdplus(0:nmax,0:nmax,-nmax:nmax)
-%    rdminus(0:nmax,0:nmax,-nmax:nmax)
-%    rdsq3(0:nmax,0:nmax,-nmax:nmax)
-%    rdmsq3(0:nmax,0:nmax,-nmax:nmax)
-%    rlsc(0:nmax,0:nmax,nlams)
-%    tmp(nd,0:nmax,-nmax:nmax,nthd)
-%
-
+%cccccc       
+%cccccc used to be insdie lfmm3d_mps, after lfmm3dmain_mps
+%cccccc sor local expansion ccccccccccccccccccccccccccccccccccccccccccccccc
+%cccccc
+     for i = 1:nmpole
+       mt = mtermssort(i);
+       ilen = (mt+1)*(2*mt+1);
+       ijk = 1;
+       for j = 1:ilen
+         for l = 1:nd
+           local(impole(isrc(i))+ijk-1)=localsort(impolesort(i)+ijk-1);
+           ijk = ijk+1;
+         end
+       end
+     end
+% local_f = importdata('mps_data.dat');
 
 %%%%%% post process       
        interms = (mterms(1)+1)*(2*mterms(1)+1);

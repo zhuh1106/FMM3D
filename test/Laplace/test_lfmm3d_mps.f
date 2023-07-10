@@ -1276,7 +1276,12 @@ cccccc
              ijk = ijk+1
            enddo
          enddo
-       enddo       
+       enddo  
+      !  open(1, file = 'mps_data.dat')
+      !  do j=1,nd*ntot  
+      !    write(1,*) real(local(j))
+      !  enddo
+      !  close(1)      
 cccccc        
 cccccc        
 cccccc        
