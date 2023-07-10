@@ -1097,7 +1097,7 @@ C$         ithd=omp_get_thread_num()
 
       !  open(1, file = 'mps_data.dat')
       !  do j=1,lmpole  
-      !    write(1,*) imag(localsort(j))
+      !    write(1,*) real(localsort(j))
       !  enddo
       !  close(1) 
       
@@ -1178,6 +1178,7 @@ C$     time1=omp_get_wtime()
              iend = isrcse(2,ibox)
              npts = iend - istart + 1
              do i = istart, iend
+              !  print *, "i value: ", i
                call l3dlocloc(nd, scales(ilev),
      1              treecenters(1,ibox), rmlexp(iaddr(2, ibox)),
      2              nterms(ilev), rmpolesort(i), cmpolesort(1,i),
@@ -1190,6 +1191,11 @@ C$     time1=omp_get_wtime()
        call cpu_time(time2)
 C$     time2=omp_get_wtime()
        timeinfo(5) = time2 - time1
+      !  open(1, file = 'mps_data.dat')
+      !  do j=1,lmpole  
+      !    write(1,*) real(localsort(j))
+      !  enddo
+      !  close(1) 
 cccccc
 cccccc used to be insdie lfmm3dmain_mps       
 cccccc STEP 6 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccc

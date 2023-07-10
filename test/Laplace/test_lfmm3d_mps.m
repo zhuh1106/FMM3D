@@ -850,7 +850,7 @@
          if(npts>0) 
            for i=1:8
              jbox = itree(ipointer(5)+8*(ibox-1)+i-1);
-             if(jbox>0) % pay attention to real or imaginary
+             if(jbox>0) % pay attention to real or complex
                rmlexpi = reshape(rmlexp(iaddr(2,ibox):(iaddr(2,ibox)-1+2*nd*(nterms(ilev+1)+1)*(2*nterms(ilev+1)+1))),2,[]);
                cmlexpi = reshape(rmlexpi(1,:)'+1i*rmlexpi(2,:)',nd,nterms(ilev+1)+1,2*nterms(ilev+1)+1);
                % assign 0 value to rmlexpj, then add output from l3dlocloc back to rmlexp
@@ -867,7 +867,36 @@
          end
        end
      end
-
+%      rmlexp_f=importdata('mps_data.dat'); % rmlexp check...
+%cccccc
+%cccccc used to be insdie lfmm3dmain_mps       
+%cccccc STEP 5 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+%cccccc
+% c      ... step 5, shift leaf box loc exp to mpole center
+     disp(['=== Step 5 (LOC to CEN) ===*']);
+     for ilev = 0:nlevels
+       for ibox = laddr(1,ilev+1):laddr(2,ilev+1)
+         nchild = itree(ipointer(4)+ibox-1);
+         if(nchild==0) % leaf box loc exp to mpole center
+           istart = isrcse(1,ibox);
+           iend = isrcse(2,ibox);
+           npts = iend - istart + 1;
+           for i = istart:iend % pay attention to real or complex...
+             rmlexpi = reshape(rmlexp(iaddr(2,ibox):(iaddr(2,ibox)-1+2*nd*(nterms(ilev+1)+1)*(2*nterms(ilev+1)+1))),2,[]);
+             cmlexpi = reshape(rmlexpi(1,:)'+1i*rmlexpi(2,:)',nd,nterms(ilev+1)+1,2*nterms(ilev+1)+1);
+             % assign 0 value to localsorti, localsort is complex already
+             localsorti = 0*localsort(impolesort(i):(impolesort(i)-1+nd*(mtermssort(i)+1)*(2*mtermssort(i)+1)));
+             localsorti = l3dlocloc_mex(nd, scales(ilev+1),...
+                   treecenters(:,ibox), cmlexpi,...
+                   nterms(ilev+1), rmpolesort(i), cmpolesort(:,i),...
+                   localsorti, mtermssort(i),...
+                   dc,lca);
+             localsort(impolesort(i):(impolesort(i)-1+nd*(mtermssort(i)+1)*(2*mtermssort(i)+1))) = localsort(impolesort(i):(impolesort(i)-1+nd*(mtermssort(i)+1)*(2*mtermssort(i)+1))) + localsorti(:);
+           end
+         end
+       end
+     end
+%      localsort_f = importdata('mps_data.dat');
      keyboard
 
 %    boxsize(0:nlevels)
