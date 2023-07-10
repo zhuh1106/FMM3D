@@ -1106,6 +1106,11 @@ C$         ithd=omp_get_thread_num()
         !   write(1,*) rmlexp(j)
         ! enddo
         ! close(1) 
+
+      !  open(1, file = 'mps_data.dat')
+      !  do j=1,ltree
+      !   write(1,*) itree(j)
+      !  enddo
        
 
        deallocate(iboxsrcind,iboxisort,iboxisort_tmp)
@@ -1150,7 +1155,12 @@ C$     time1=omp_get_wtime()
        enddo
        call cpu_time(time2)
 C$     time2=omp_get_wtime()
-       timeinfo(4) = time2-time1
+      !  timeinfo(4) = time2-time1
+      !  open(1, file = 'mps_data.dat')
+      !   do j=1,lmptottmp  
+      !     write(1,*) rmlexp(j)
+      !   enddo
+      !   close(1) 
 cccccc
 cccccc used to be insdie lfmm3dmain_mps       
 cccccc STEP 5 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccc

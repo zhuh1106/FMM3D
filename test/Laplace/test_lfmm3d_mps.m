@@ -836,9 +836,39 @@
      end
 %     localsort_f=importdata('mps_data.dat'); % localsort check...
 %     rmlexp_f=importdata('mps_data.dat'); % rmlexp check...
-     keyboard
+%
+%cccccc
+%cccccc used to be insdie lfmm3dmain_mps       
+%cccccc STEP 4 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+%cccccc     
+     disp(['=== Step 4 (split loc) ===*']);    
+     for ilev = 2:nlevels-1
+       for ibox = laddr(1,ilev+1):laddr(2,ilev+1)
+         istart = isrcse(1,ibox);
+         iend = isrcse(2,ibox);
+         npts = iend-istart+1;
+         if(npts>0) 
+           for i=1:8
+             jbox = itree(ipointer(5)+8*(ibox-1)+i-1);
+             if(jbox>0) % pay attention to real or imaginary
+               rmlexpi = reshape(rmlexp(iaddr(2,ibox):(iaddr(2,ibox)-1+2*nd*(nterms(ilev+1)+1)*(2*nterms(ilev+1)+1))),2,[]);
+               cmlexpi = reshape(rmlexpi(1,:)'+1i*rmlexpi(2,:)',nd,nterms(ilev+1)+1,2*nterms(ilev+1)+1);
+               % assign 0 value to rmlexpj, then add output from l3dlocloc back to rmlexp
+               rmlexpj = 0*reshape(rmlexp(iaddr(2,jbox):(iaddr(2,jbox)-1+2*nd*(nterms(ilev+2)+1)*(2*nterms(ilev+2)+1))),2,[]);
+               cmlexpj = reshape(rmlexpj(1,:)'+1i*rmlexpj(2,:)',nd,nterms(ilev+2)+1,2*nterms(ilev+2)+1);
+               cmlexpj = l3dlocloc_mex(nd,scales(ilev+1),...
+                     treecenters(:,ibox),cmlexpi,...
+                     nterms(ilev+1),scales(ilev+2),treecenters(:,jbox),...
+                     cmlexpj,nterms(ilev+2),dc,lca);
+               rmlexpj = [real(cmlexpj(:)) imag(cmlexpj(:))]';
+               rmlexp(iaddr(2,jbox):(iaddr(2,jbox)-1+2*nd*(nterms(ilev+2)+1)*(2*nterms(ilev+2)+1))) = rmlexp(iaddr(2,jbox):(iaddr(2,jbox)-1+2*nd*(nterms(ilev+2)+1)*(2*nterms(ilev+2)+1))) + rmlexpj(:);
+             end
+           end
+         end
+       end
+     end
 
-       
+     keyboard
 
 %    boxsize(0:nlevels)
 %    nterms(0:nlevels)
