@@ -897,6 +897,45 @@
        end
      end
 %      localsort_f = importdata('mps_data.dat');
+
+%cccccc
+%cccccc used to be insdie lfmm3dmain_mps       
+%cccccc STEP 6 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+%cccccc   
+%cc     directly evaluate potential at sources and targets
+     disp(['=== STEP 6 (direct) =====*']);
+     for ilev=0:nlevels
+       for ibox = laddr(1,ilev+1):laddr(2,ilev+1)
+         istart = isrcse(1,ibox);
+         iend = isrcse(2,ibox);
+         npts0 = iend-istart+1;
+         for iloc = istart:iend
+           for i = 1:nlist1(ibox)
+             jbox = list1(i,ibox);
+             jstart = isrcse(1,jbox);
+             jend = isrcse(2,jbox);
+             npts = jend - jstart+1;
+             for j = jstart:jend
+               d = (cmpolesort(1,j)-cmpolesort(1,iloc))^2 + (cmpolesort(2,j)-cmpolesort(2,iloc))^2 + (cmpolesort(3,j)-cmpolesort(3,iloc))^2;
+               d = sqrt(d);
+               if (d > thresh)
+                 mpolesortj = mpolesort(impolesort(j):(impolesort(j)-1+nd*(mtermssort(j)+1)*(2*mtermssort(j)+1)));
+                 % assign 0 value to localsortj
+                 localsortj = 0*localsort(impolesort(iloc):(impolesort(iloc)-1+nd*(mtermssort(iloc)+1)*(2*mtermssort(iloc)+1)));
+                 localsortj = l3dmploc_mex(nd, rmpolesort(j),...
+                       cmpolesort(:,j),...
+                       mpolesortj, mtermssort(j),...
+                       rmpolesort(iloc), cmpolesort(:,iloc),...
+                       localsortj,...
+                       mtermssort(iloc),dc,lca);
+                 localsort(impolesort(iloc):(impolesort(iloc)-1+nd*(mtermssort(iloc)+1)*(2*mtermssort(iloc)+1))) = localsort(impolesort(iloc):(impolesort(iloc)-1+nd*(mtermssort(iloc)+1)*(2*mtermssort(iloc)+1))) + localsortj(:);
+               end
+             end
+           end
+         end
+       end
+     end
+
      keyboard
 
 %    boxsize(0:nlevels)

@@ -816,6 +816,11 @@ cc                process east-west for current box
             endif
          enddo
        enddo
+      !  open(1, file = 'mps_data.dat')  
+      !  do i=1,lmpole
+      !   write(1,*) real(mpolesort(i))
+      !  enddo
+      !  close(1)
 
        deallocate(gboxfl,gboxsubcenters,gboxwexp)
        deallocate(gboxind)
@@ -1235,6 +1240,11 @@ c      due to sources in list1
            enddo
          enddo  
        enddo
+      !  open(1, file = 'mps_data.dat')
+      !  do j=1,lmpole  
+      !    write(1,*) imag(localsort(j))
+      !  enddo
+      !  close(1) 
        call cpu_time(time2)
 C$     time2=omp_get_wtime()
        timeinfo(6) = time2-time1
