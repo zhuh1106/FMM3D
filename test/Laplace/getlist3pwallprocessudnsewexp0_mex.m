@@ -14,3 +14,4 @@ mex_id_ = 'getlist3pwallprocessudnsewexp0(i int64_t[x], i double[x], i int64_t[x
 % getlist3pwallprocessudnsewexp0(               ibox,           bs,        nboxes,        nlist3,             list3,        isep,                  centers,        nd,        nterms,                                      rmlexp,               rlams,               whts,        nlams,            nfourier,            nphysical,        nthmax,        nexptot,        nexptotp,                              mexp,                      mexpup,                      mexpdown,                       mexpupphys,                       mexpdownphys,                       mexppall1,                       mexppall2,                       xs,                       ys,                    zs,              fexpback,        nn,                        rlsc,                 rscpow,                            rdplus,                            rdminus);
 rmlexp; % reshape?
 end
+

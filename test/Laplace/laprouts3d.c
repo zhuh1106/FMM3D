@@ -4049,6 +4049,7 @@ mw_err_label:
 
 /* ---- laprouts3d.mw: 181 ----
  * ptstreemem(double[3, ns] src, int64_t[1] ns, double[3, ntuse] targ, int64_t[1] nt, int64_t[1] idivflag, int64_t[1] ndiv, int64_t[1] nlmin, int64_t[1] nlmax, int64_t[1] ifunif, int64_t[1] iper, inout int64_t[1] nlevels, inout int64_t[1] nboxes, inout int64_t[1] ltree);
+ * Also at laprouts3d.mw: 511
  */
 static const char* stubids19_ = "ptstreemem(i double[xx], i int64_t[x], i double[xx], i int64_t[x], i int64_t[x], i int64_t[x], i int64_t[x], i int64_t[x], i int64_t[x], i int64_t[x], io int64_t[x], io int64_t[x], io int64_t[x])";
 
@@ -4273,6 +4274,7 @@ mw_err_label:
 
 /* ---- laprouts3d.mw: 188 ----
  * ptstreebuild(double[3, ns] src, int64_t[1] ns, double[3, ntuse] targ, int64_t[1] nt, int64_t[1] idivflag, int64_t[1] ndiv, int64_t[1] nlmin, int64_t[1] nlmax, int64_t[1] ifunif, int64_t[1] iper, int64_t[1] nlevels, int64_t[1] nboxes, int64_t[1] ltree, inout int64_t[ltree] itree, inout int64_t[8] iptr, inout double[3, nboxes] centers, inout double[nlevels1] boxsize);
+ * Also at laprouts3d.mw: 519
  */
 static const char* stubids20_ = "ptstreebuild(i double[xx], i int64_t[x], i double[xx], i int64_t[x], i int64_t[x], i int64_t[x], i int64_t[x], i int64_t[x], i int64_t[x], i int64_t[x], i int64_t[x], i int64_t[x], i int64_t[x], io int64_t[x], io int64_t[x], io double[xx], io double[x])";
 
@@ -4559,6 +4561,7 @@ mw_err_label:
 
 /* ---- laprouts3d.mw: 193 ----
  * ptstreesort(int64_t[1] n, double[3, n] xys, int64_t[ltree] itree, int64_t[1] ltree, int64_t[1] nboxes, int64_t[1] nlevels, int64_t[8] iptr, double[3, nboxes] centers, inout int64_t[n] ixy, inout int64_t[2, nboxes] ixyse);
+ * Also at laprouts3d.mw: 526
  */
 static const char* stubids21_ = "ptstreesort(i int64_t[x], i double[xx], i int64_t[x], i int64_t[x], i int64_t[x], i int64_t[x], i int64_t[x], i double[xx], io int64_t[x], io int64_t[xx])";
 
@@ -10810,9 +10813,9 @@ void mexFunction(int nlhs, mxArray* plhs[],
         mexPrintf("%d calls to laprouts3d.mw:144\n", mexprofrecord_[16]);
         mexPrintf("%d calls to laprouts3d.mw:167\n", mexprofrecord_[17]);
         mexPrintf("%d calls to laprouts3d.mw:175\n", mexprofrecord_[18]);
-        mexPrintf("%d calls to laprouts3d.mw:181\n", mexprofrecord_[19]);
-        mexPrintf("%d calls to laprouts3d.mw:188\n", mexprofrecord_[20]);
-        mexPrintf("%d calls to laprouts3d.mw:193\n", mexprofrecord_[21]);
+        mexPrintf("%d calls to laprouts3d.mw:181 (laprouts3d.mw:511)\n", mexprofrecord_[19]);
+        mexPrintf("%d calls to laprouts3d.mw:188 (laprouts3d.mw:519)\n", mexprofrecord_[20]);
+        mexPrintf("%d calls to laprouts3d.mw:193 (laprouts3d.mw:526)\n", mexprofrecord_[21]);
         mexPrintf("%d calls to laprouts3d.mw:202\n", mexprofrecord_[23]);
         mexPrintf("%d calls to laprouts3d.mw:207\n", mexprofrecord_[24]);
         mexPrintf("%d calls to laprouts3d.mw:213\n", mexprofrecord_[25]);
@@ -10863,9 +10866,9 @@ void mexFunction(int nlhs, mxArray* plhs[],
         fprintf(logfp, "%d calls to laprouts3d.mw:144\n", mexprofrecord_[16]);
         fprintf(logfp, "%d calls to laprouts3d.mw:167\n", mexprofrecord_[17]);
         fprintf(logfp, "%d calls to laprouts3d.mw:175\n", mexprofrecord_[18]);
-        fprintf(logfp, "%d calls to laprouts3d.mw:181\n", mexprofrecord_[19]);
-        fprintf(logfp, "%d calls to laprouts3d.mw:188\n", mexprofrecord_[20]);
-        fprintf(logfp, "%d calls to laprouts3d.mw:193\n", mexprofrecord_[21]);
+        fprintf(logfp, "%d calls to laprouts3d.mw:181 (laprouts3d.mw:511)\n", mexprofrecord_[19]);
+        fprintf(logfp, "%d calls to laprouts3d.mw:188 (laprouts3d.mw:519)\n", mexprofrecord_[20]);
+        fprintf(logfp, "%d calls to laprouts3d.mw:193 (laprouts3d.mw:526)\n", mexprofrecord_[21]);
         fprintf(logfp, "%d calls to laprouts3d.mw:202\n", mexprofrecord_[23]);
         fprintf(logfp, "%d calls to laprouts3d.mw:207\n", mexprofrecord_[24]);
         fprintf(logfp, "%d calls to laprouts3d.mw:213\n", mexprofrecord_[25]);
