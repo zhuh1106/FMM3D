@@ -56,7 +56,7 @@ opts.ndiv = 40;
       nodesYew = centers(2,k) + boxsize(level(k))/2*[[1,1,-1,-1,1] [1,1,-1,-1,1]]/2;
       nodesZew = centers(3,k) + boxsize(level(k))/2*[[1,-1,-1,1,1] [1,-1,-1,1,1]]/2;
       %
-      if ixyse(2,k) > ixyse(1,k) % plot pts box by box (some does not have any)
+      if ixyse(2,k) >= ixyse(1,k) % plot pts box by box (some does not have any)
         sources_sort_k = sources_sort(:,ixyse(1,k):ixyse(2,k));
         if 0
           plot3(sources_sort_k(1,:),sources_sort_k(2,:),sources_sort_k(3,:),'.'); hold on  
