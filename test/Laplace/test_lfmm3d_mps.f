@@ -185,7 +185,7 @@ c      initialize printing routine
       
        nd = 1
       
-       n1 = 9
+       n1 = 7
       !  n1 = 9
        ns = n1**3
        nmpole = ns
@@ -251,11 +251,11 @@ c      generate sources uniformly in the unit cube
        end do
         
       
-       shift = h/1000
+       shift = h/10
        call prin2('shift = *', shift, 1)
        do i = 1,ns
          cmpole(1,i) = source(1,i) + shift
-         cmpole(2,i) = source(2,i)
+         cmpole(2,i) = source(2,i) - shift
          cmpole(3,i) = source(3,i)
        end do
       
@@ -478,6 +478,8 @@ c      irmlexp is pointer for workspace need by various fmm routines,
        allocate(iaddrtmp(2,nboxes))
        call mpalloc0(nd,itree(ipointer(1)),iaddrtmp,nlevels,lmptottmp,
      1      nterms,nboxes)
+       print *, "lmptottmp = ", lmptottmp/1.0d9
+       print *, "nterms = ", nterms
        lmptot = int(lmptottmp,8)
        iaddr = int(iaddrtmp,8)
        if(ifprint.ge. 1) print *, "lmptot =",lmptot/1.0d9
@@ -553,6 +555,14 @@ c      initialize various tree lists
      3      itree(ipointer(7)),iper,nlist1,mnlist1,list1,nlist2,
      4      mnlist2,list2,nlist3,mnlist3,list3,
      4      nlist4,mnlist4,list4)
+       
+      open(1, file = 'mps_data8.dat')
+      do i=1,577
+        write(1,*) (list4(1,i))
+      enddo
+      close(1)  
+      print *, "list4: ", list4(1,1:4)
+       
 c      Initialize routines for plane wave mp loc translation
        if(isep.eq.1) then
          if(eps.ge.0.5d-2) nlams = 12
@@ -815,10 +825,52 @@ cc                process east-west for current box
               endif
             endif
          enddo
+        !  if (ilev.eq.1) then
+        !  open(1, file = 'mps_data12.dat')
+        !   do i=1,6
+        !     do j=1,1627
+        !       write(1,*) real(pgboxwexp(1,j,1,i))
+        !     enddo
+        !   enddo
+        ! endif
        enddo
       !  open(1, file = 'mps_data.dat')  
       !  do i=1,lmpole
       !   write(1,*) real(mpolesort(i))
+      !  enddo
+      !  close(1)
+      !  open(1, file = 'mps_data2.dat')  
+      !  do i=1,lmpole
+      !   write(1,*) imag(mpolesort(i))
+      !  enddo
+      !  close(1)
+      !  open(1, file = 'mps_data3.dat')  
+      !  do i=1,nmpole
+      !   write(1,*) rmpolesort(i)
+      !  end do  
+      !  close(1)
+      !  open(1, file = 'mps_data4.dat')  
+      !  do i=1,nmpole
+      !   do j=1,3
+      !     write(1,*) cmpolesort(j, i)
+      !   enddo
+      !  end do  
+      !  close(1)
+       open(1, file = 'mps_data12.dat')
+       do i=1,6
+         do j=1,1627
+           write(1,*) real(pgboxwexp(1,j,1,i))
+         enddo
+       enddo
+
+       
+      !   open(1, file = 'mps_data.dat')  
+      !  do i=1,1
+      !   do j=-nmax,nmax
+      !     do k=0,nmax
+      !      write(1,*) imag(tmp(1,k,j,i))
+      !     enddo
+      !   enddo
       !  enddo
       !  close(1)
 
@@ -862,7 +914,12 @@ c       of each leaf-node box
        enddo
        call cpu_time(time2)
 C$     time2=omp_get_wtime()
-       timeinfo(1)=time2-time1
+       
+      !  open(1, file = 'mps_data.dat')  
+      !  do i=1,size(rmlexp)
+      !     write(1,*) rmlexp(i)
+      !  end do  
+      !  close(1)    
       
 cccccc
 cccccc used to be insdie lfmm3dmain_mps       
@@ -893,6 +950,12 @@ C$     time1=omp_get_wtime()
        call cpu_time(time2)
 C$     time2=omp_get_wtime()
        timeinfo(2)=time2-time1
+       
+      !  open(1, file = 'mps_data.dat')  
+      !  do i=1,size(rmlexp)
+      !     write(1,*) rmlexp(i)
+      !  end do  
+      !  close(1)    
 
 cccccc
 cccccc used to be insdie lfmm3dmain_mps       
@@ -989,8 +1052,82 @@ cc                process east-west for current box
      1          nphysical,nthmax,mexp(1,1,ibox,5),fexpe,fexpo)
                 call ftophys(nd,mexpf2(1,1,ithd),nlams,rlams,nfourier,
      1          nphysical,nthmax,mexp(1,1,ibox,6),fexpe,fexpo)
+
+              ! if(ibox.eq.12) then
+              !   print *, "boxsize = ", boxsize(ilev)
+              !   print *, "nboxes = ", nboxes
+              !   print *, "itree(....) = ", itree(ipointer(6)+ibox-1)
+              !   print *, "nchild = ", nchild
+              !   print *, "scales(ilev) = ", scales(ilev)
+              !   print *, "nterms(ilev) = ", nterms(ilev)
+
+              !   open(1, file = 'mps_data.dat')  
+              !   do i=1,1
+              !     do j=1,405
+              !       do k=1,1
+              !       write(1,*) real(mexpf1(i,j,k))
+              !       enddo
+              !     enddo
+              !   end do  
+              !   close(1)    
+                
+              !   ! open(1, file = 'mps_data.dat')  
+              !   ! do i=1,size(rmlexp)
+              !   !     write(1,*) rmlexp(i)
+              !   ! end do  
+              !   ! close(1)    
+              ! endif
+
             endif
          enddo
+
+        !  if (ilev.eq.3) then
+        !   open(1, file = 'mps_data.dat')  
+        !   do i=1,6
+        !     do k=1,577
+        !       do j=1,1627
+        !           write(1,*) real(mexp(1,j,k,i))
+        !         enddo
+        !       enddo
+        !     enddo
+        !     close(1)    
+        !   endif
+
+        ! if (ilev.eq.3) then 
+        !  open(1, file = 'mps_data.dat')  
+        !   do i=1,1
+        !     do j=1,405
+        !       do k=1,1
+        !       write(1,*) real(mexpf1(i,j,k))
+        !       enddo
+        !     enddo
+        !   end do  
+        !   close(1)    
+        ! endif
+
+        !  if (ilev.eq.3) then 
+        !   open(1, file = 'mps_data.dat')  
+        !    do i=1,1
+        !      do j=1,1627
+        !        do k=1,1
+        !        write(1,*) (mexpp1(i,j,k))
+        !        enddo
+        !      enddo
+        !    end do  
+        !    close(1)    
+        !  endif
+
+      !   if (ilev.eq.3) then
+      !   open(1, file = 'mps_data.dat')  
+      !  do i=1,1
+      !   do j=-nmax,nmax
+      !     do k=0,nmax
+      !      write(1,*) imag(tmp(1,k,j,i))
+      !     enddo
+      !   enddo
+      !  enddo
+      !  close(1)
+      !  endif
          
          do i=1,nd
           do j=1,nexptot
@@ -1020,6 +1157,101 @@ C$         ithd=omp_get_thread_num()
            iend = isrcse(2,ibox)
            npts = npts + iend-istart+1
            if(npts.gt.0.and.nchild.gt.0) then
+            
+
+            if(ibox.eq.12) then
+              print *, "ilev = ", ilev
+              print *, "boxsize = ", boxsize(ilev)
+              print *, "nboxes = ", nboxes
+              print *, "itree(....) = ", itree(ipointer(6)+ibox-1)
+              print *, "nborsi = ",itree(ipointer(7)+mnbors*(ibox-1)+11)
+              print *, "nchild = ", nchild
+              print *, "scales(ilev) = ", scales(ilev)
+              print *, "nterms(ilev) = ", nterms(ilev)
+              print *, "cntlist4 = ", cntlist4
+              print *, "list4 = ", list4(1,1:4)
+              print *, "mnlist4 = ", mnlist4
+              print *, "itree(ipointer(5)) = ", itree(ipointer(5))
+              print *, "isep = ", isep
+              print *, "nn = ", nn
+              print *, "lmptot = ", lmptot
+              ! print *, "rscpow = ", rscpow
+              ! list4(1,2) = 0
+              ! list4(1,4) = 0
+              
+              open(1, file = 'mps_data.dat')  
+              do i=1,size(rmlexp)
+                  write(1,*) rmlexp(i)
+              end do  
+              close(1)    
+
+              open(1, file = 'mps_data2.dat')  
+              do i=1,1
+                do j=1,405
+                  do k=1,1
+                   write(1,*) real(mexpf2(i,j,k))
+                  enddo
+                enddo
+              end do  
+              close(1)    
+
+                open(1, file = 'mps_data3.dat')  
+                do i=1,1
+                  do j=1,1627
+                    do k=1,1
+                    write(1,*) real(mexpp1(i,j,k))
+                    enddo
+                  enddo
+                end do  
+                close(1)    
+
+                open(1, file = 'mps_data4.dat')  
+                do i=1,27037
+                  write(1,*) real(fexpback(i))
+                end do  
+                close(1)    
+                
+                open(1, file = 'mps_data5.dat') 
+                do i=1,16
+                  do j=1,1627
+                    write(1,*) real(mexppall(1,j,i,1))
+                  enddo
+                enddo
+                close(1)   
+
+                open(1, file = 'mps_data6.dat')
+                do i=1,577
+                  write(1,*) (nlist4(i))
+                enddo
+                close(1)  
+                
+                open(1, file = 'mps_data7.dat')
+                do i=1,577
+                  write(1,*) (list4ct(i))
+                enddo
+                close(1)  
+
+                open(1, file = 'mps_data10.dat')
+                do i=1,577
+                  write(1,*) (list4(1,i))
+                enddo
+                close(1)  
+
+                open(1, file = 'mps_data9.dat')
+                do i=1,577
+                  do j=1,3
+                    write(1,*) treecenters(j,i)
+                  enddo
+                enddo
+
+                open(1, file = 'mps_data11.dat')
+                do i=1,6
+                  do j=1,1627
+                    write(1,*) real(pgboxwexp(1,j,1,i))
+                  enddo
+                enddo
+
+             endif
 
               call getpwlistallprocessudnsewexp0(ibox,boxsize(ilev),
      1         nboxes,itree(ipointer(6)+ibox-1),
@@ -1034,70 +1266,104 @@ C$         ithd=omp_get_thread_num()
      9         mexppall(1,1,1,ithd),rdplus,rdminus,
      9         xshift,yshift,zshift,fexpback,nn,rlsc,rscpow,
      9         pgboxwexp,cntlist4,list4ct,nlist4,list4,mnlist4) 
+
+              
+            !  if(ibox.eq.10) then
+            !   print *, "ilev = ", ilev
+            !   print *, "boxsize = ", boxsize(ilev)
+            !   print *, "nboxes = ", nboxes
+            !   print *, "itree(....) = ", itree(ipointer(6)+ibox-1)
+            !   print *, "nchild = ", nchild
+            !   print *, "scales(ilev) = ", scales(ilev)
+            !   print *, "nterms(ilev) = ", nterms(ilev)
+
+            !   open(1, file = 'mps_data.dat')  
+            !   do i=1,1
+            !     do j=1,405
+            !       do k=1,1
+            !        write(1,*) imag(mexpf1(i,j,k))
+            !       enddo
+            !     enddo
+            !   end do  
+            !   close(1)    
+              
+            !   ! open(1, file = 'mps_data.dat')  
+            !   ! do i=1,size(rmlexp)
+            !   !     write(1,*) rmlexp(i)
+            !   ! end do  
+            !   ! close(1)    
+            !  endif
               
 
            endif
            if(nlist3(ibox).gt.0.and.npts.gt.0) then
              print *, "this is actually processed..."
-             do i=1,8
-              call mpzero(nd,iboxlexp(1,i,ithd),nterms(ilev))
-             enddo
+    !          do i=1,8
+    !           call mpzero(nd,iboxlexp(1,i,ithd),nterms(ilev))
+    !          enddo
              
-             call  getlist3pwallprocessudnsewexp0(ibox,boxsize(ilev),
-     1            nboxes,nlist3(ibox),list3(1,ibox),
-     2            isep,treecenters,nd,
-     3            nterms(ilev),iboxlexp(1,1,ithd),rlams,
-     4            whts,nlams,nfourier,nphysical,nthmax,
-     5            nexptot,nexptotp,mexp,
-     6            mexpf1(1,1,ithd),mexpf2(1,1,ithd),
-     7            mexpp1(1,1,ithd),mexpp2(1,1,ithd),
-     8            mexppall(1,1,1,ithd),mexppall(1,1,2,ithd),
-     9            xshift,yshift,zshift,fexpback,nn,rlsc,rscpow,
-     9            rdplus,rdminus)
+    !          call  getlist3pwallprocessudnsewexp0(ibox,boxsize(ilev),
+    !  1            nboxes,nlist3(ibox),list3(1,ibox),
+    !  2            isep,treecenters,nd,
+    !  3            nterms(ilev),iboxlexp(1,1,ithd),rlams,
+    !  4            whts,nlams,nfourier,nphysical,nthmax,
+    !  5            nexptot,nexptotp,mexp,
+    !  6            mexpf1(1,1,ithd),mexpf2(1,1,ithd),
+    !  7            mexpp1(1,1,ithd),mexpp2(1,1,ithd),
+    !  8            mexppall(1,1,1,ithd),mexppall(1,1,2,ithd),
+    !  9            xshift,yshift,zshift,fexpback,nn,rlsc,rscpow,
+    !  9            rdplus,rdminus)
 
-            !  if (ibox.eq.148) then
-            !   open(1, file = 'mps_data.dat')
-            !   do i=1,8
-            !     do j=1,nd*(nterms(ilev)+1)*(2*nterms(ilev)+1)
-            !       write(1,*) imag(iboxlexp(j,i,ithd))
-            !     enddo
-            !   enddo
-            !   close(1) 
-            !  endif
+    !         !  if (ibox.eq.148) then
+    !         !   open(1, file = 'mps_data.dat')
+    !         !   do i=1,8
+    !         !     do j=1,nd*(nterms(ilev)+1)*(2*nterms(ilev)+1)
+    !         !       write(1,*) imag(iboxlexp(j,i,ithd))
+    !         !     enddo
+    !         !   enddo
+    !         !   close(1) 
+    !         !  endif
      
-             istart = isrcse(1,ibox)
-             iend = isrcse(2,ibox)
-             npts = iend-istart+1
-             if(npts.gt.0) then
-               call subdividebox(cmpolesort(1,istart),npts,
-     1              treecenters(1,ibox),boxsize(ilev),
-     2              iboxsrcind(1,ithd),iboxfl(1,1,ithd),
-     3              iboxsubcenters(1,1,ithd))
-               do i=istart,iend
-                 iboxisort_tmp(i-istart+1,ithd) = i
-               enddo
-               call ireorderf(1,npts,iboxisort_tmp(1,ithd),
-     1              iboxisort(1,ithd),iboxsrcind(1,ithd))
-               do i=1,8
-                 if(iboxfl(1,i,ithd).gt.0) then
-                   jstart=iboxfl(1,i,ithd)
-                   jend=iboxfl(2,i,ithd)
-                   npts0=jend-jstart+1
-                   do j = jstart,jend
-                     k = iboxisort(j,ithd)
-                     call l3dlocloc(nd,scales(ilev),
-     1                    iboxsubcenters(1,i,ithd),iboxlexp(1,i,ithd),
-     2                    nterms(ilev),
-     3                    rmpolesort(k),cmpolesort(1,k),
-     4                    localsort(impolesort(k)), mtermssort(k),
-     5                    dc,lca)
-                   enddo
-                 endif
-               enddo
-             endif
+    !          istart = isrcse(1,ibox)
+    !          iend = isrcse(2,ibox)
+    !          npts = iend-istart+1
+    !          if(npts.gt.0) then
+    !            call subdividebox(cmpolesort(1,istart),npts,
+    !  1              treecenters(1,ibox),boxsize(ilev),
+    !  2              iboxsrcind(1,ithd),iboxfl(1,1,ithd),
+    !  3              iboxsubcenters(1,1,ithd))
+    !            do i=istart,iend
+    !              iboxisort_tmp(i-istart+1,ithd) = i
+    !            enddo
+    !            call ireorderf(1,npts,iboxisort_tmp(1,ithd),
+    !  1              iboxisort(1,ithd),iboxsrcind(1,ithd))
+    !            do i=1,8
+    !              if(iboxfl(1,i,ithd).gt.0) then
+    !                jstart=iboxfl(1,i,ithd)
+    !                jend=iboxfl(2,i,ithd)
+    !                npts0=jend-jstart+1
+    !                do j = jstart,jend
+    !                  k = iboxisort(j,ithd)
+    !                  call l3dlocloc(nd,scales(ilev),
+    !  1                    iboxsubcenters(1,i,ithd),iboxlexp(1,i,ithd),
+    !  2                    nterms(ilev),
+    !  3                    rmpolesort(k),cmpolesort(1,k),
+    !  4                    localsort(impolesort(k)), mtermssort(k),
+    !  5                    dc,lca)
+    !                enddo
+    !              endif
+    !            enddo
+    !          endif
            endif
          enddo 
          deallocate(iboxlexp)
+        !  if (ilev.eq.2) then
+        !  open(1, file = 'mps_data.dat')
+        !   do j=1,lmptottmp  
+        !     write(1,*) rmlexp(j)
+        !   enddo
+        !   close(1) 
+        ! endif
        enddo
 
       !  open(1, file = 'mps_data.dat')

@@ -349,7 +349,7 @@ mexpupdown = reshape(mexpupdown,ndnexptot,2);
 # FORTRAN getpwlistallprocessudnsewexp02(int[1] ibox, double[1] bs, int[1] nboxes, int[1] nnbors, int[nnbors] nbors, int[1] nchild, int[8,nboxes] ichild, double[3,nboxes] centers, int[1] isep, int[1] nd, int[1] ilev, double[1] rscale, int[1] nterms, int[2,nboxes] iaddrtmp, inout double[lmptottmp] rmlexp, int[1] lmptottmp, double[nlams] rlams, double[nlams] whts, int[1] nlams, int[nlams] nfourier, int[nlams] nphysical, int[1] nthmax, int[1] nexptot, int[1] nexptotp, dcomplex[ndnexptotp,nboxes6] mexp, dcomplex[ndnexptot,2] mexpupdown, dcomplex[nd,nexptotp] mexpupphys, dcomplex[nd,nexptotp] mexpdownphys, dcomplex[ndnexptotp,16] mexppall, double[nterms1s,nterms2p1] rdplus, double[nterms1s,nterms2p1] rdminus,  dcomplex[11,nexptotp] xs, dcomplex[11,nexptotp] ys, double[5,nexptotp] zs, double[nterms1s,nlams] rlsc, double[nterms1] rscpow, dcomplex[nn] fexpback, int[1] nn);
 end
 
-@function rmlexp = getpwlistallprocessudnsewexp0_mex(ibox,bs,nboxes,nnbors,nbors,nchild,ichild,centers,isep,nd,ilev,rscale,nterms,iaddrtmp,rmlexp,lmptottmp,rlams,whts,nlams,nfourier,nphysical,nthmax,nexptot,nexptotp,mexp,mexpup,mexpdown,mexpupphys,mexpdownphys,mexppall,rdplus,rdminus,xs,ys,zs,fexpback,nn,rlsc,rscpow, pgboxwexp,cntlist4,list4ct,nlist4,list4,mnlist4)
+@function [rmlexp, mexp, mexpup, mexpdown, mexpupphys, mexpdownphys, mexppall, rdplus, rdminus, xs, ys, zs, fexpback, rlsc, rscpow, pgboxwexp, cntlist4, list4ct, nlist4, list4, mnlist4] = getpwlistallprocessudnsewexp0_mex(ibox,bs,nboxes,nnbors,nbors,nchild,ichild,centers,isep,nd,ilev,rscale,nterms,iaddrtmp,rmlexp,lmptottmp,rlams,whts,nlams,nfourier,nphysical,nthmax,nexptot,nexptotp,mexp,mexpup,mexpdown,mexpupphys,mexpdownphys,mexppall,rdplus,rdminus,xs,ys,zs,fexpback,nn,rlsc,rscpow, pgboxwexp,cntlist4,list4ct,nlist4,list4,mnlist4)
 ichild=reshape(ichild,8,nboxes);
 ndnexptotp=nd*nexptotp;
 nboxes6=nboxes*6;
@@ -366,7 +366,13 @@ nw8 = 0;
 rlsc = reshape(rlsc,nterms1s,nlams); 
 ndnexptot = nd*nexptot;
 pgboxwexp = reshape(pgboxwexp,ndnexptotp,cntlist46);
-# FORTRAN getpwlistallprocessudnsewexp0(int[1] ibox, double[1] bs, int[1] nboxes, int[1] nnbors, int[nnbors] nbors, int[1] nchild, int[8,nboxes] ichild, double[3,nboxes] centers, int[1] isep, int[1] nd, int[1] ilev, double[1] rscale, int[1] nterms, int[2,nboxes] iaddrtmp, inout double[lmptottmp] rmlexp, int[1] lmptottmp, double[nlams] rlams, double[nlams] whts, int[1] nlams, int[nlams] nfourier, int[nlams] nphysical, int[1] nthmax, int[1] nexptot, int[1] nexptotp, dcomplex[ndnexptotp,nboxes6] mexp, dcomplex[nd,nexptot] mexpup, dcomplex[nd,nexptot] mexpdown, dcomplex[nd,nexptotp] mexpupphys, dcomplex[nd,nexptotp] mexpdownphys, dcomplex[ndnexptotp,16] mexppall, double[nterms1s,nterms2p1] rdplus, double[nterms1s,nterms2p1] rdminus, dcomplex[11,nexptotp] xs, dcomplex[11,nexptotp] ys, double[5,nexptotp] zs, dcomplex[nn] fexpback, int[1] nn, double[nterms1s,nlams] rlsc, double[nterms1] rscpow, dcomplex[ndnexptotp,cntlist46] pgboxwexp, int[1] cntlist4, int[nboxes] list4ct, int[nboxes] nlist4, int[mnlist4,nboxes] list4, int[1] mnlist4);
+# FORTRAN getpwlistallprocessudnsewexp0(int[1] ibox, double[1] bs, int[1] nboxes, int[1] nnbors, int[nnbors] nbors, int[1] nchild, int[8,nboxes] ichild, double[3,nboxes] centers, int[1] isep, int[1] nd, int[1] ilev, double[1] rscale, int[1] nterms, int[2,nboxes] iaddrtmp, inout double[lmptottmp] rmlexp, int[1] lmptottmp, double[nlams] rlams, double[nlams] whts, int[1] nlams, int[nlams] nfourier, int[nlams] nphysical, int[1] nthmax, int[1] nexptot, int[1] nexptotp, inout dcomplex[ndnexptotp,nboxes6] mexp, inout dcomplex[nd,nexptot] mexpup, inout dcomplex[nd,nexptot] mexpdown, inout dcomplex[nd,nexptotp] mexpupphys, inout dcomplex[nd,nexptotp] mexpdownphys, inout dcomplex[ndnexptotp,16] mexppall, inout double[nterms1s,nterms2p1] rdplus, inout double[nterms1s,nterms2p1] rdminus, inout dcomplex[11,nexptotp] xs, inout dcomplex[11,nexptotp] ys, inout double[5,nexptotp] zs, inout dcomplex[nn] fexpback, int[1] nn, inout double[nterms1s,nlams] rlsc, inout double[nterms1] rscpow, inout dcomplex[ndnexptotp,cntlist46] pgboxwexp, inout int[1] cntlist4, inout int[nboxes] list4ct, inout int[nboxes] nlist4, inout int[mnlist4,nboxes] list4, inout int[1] mnlist4);
+mexp = reshape(mexp,nd,nexptotp,nboxes,6); 
+mexppall = reshape(mexppall,nd,nexptotp,16);
+rdplus = reshape(rdplus,nterms1,nterms1,nterms2p1); 
+rdminus = reshape(rdminus,nterms1,nterms1,nterms2p1);
+rlsc = reshape(rlsc,nterms1,nterms1,nlams);
+pgboxwexp = reshape(pgboxwexp,nd,nexptotp,cntlist4,6); 
 end
 
 @function [isorted,iboxfl,subcenters] = subdividebox_mex(pos,npts,center,boxsize,isorted,iboxfl,subcenters)
