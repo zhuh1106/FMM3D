@@ -134,3 +134,5 @@ function [U] = st3ddir(srcinfo,targ,ifppregtarg)
   if(ifppregtarg >= 2), U.pretarg = pretarg; end;
   if(ifppregtarg >= 3), U.gradtarg = squeeze(reshape(gradtarg,[nd,3,3,nt])); end;
 end
+
+% ---------------------------------------------------------------------

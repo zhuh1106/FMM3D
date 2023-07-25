@@ -13,10 +13,9 @@ nd = 1; % num of charge vectors
 n1 = 5;
 nmpole = n1^3;
 h = 1.0d0/(n1+1);
-radius = h/5;
+radius = h/8;
 
-nt = 19;
-ntm = 8; % mterms, same mpole order for all mps centers. could change depending on complexity, closeness?
+ntm = 16; % mterms, same mpole order for all mps centers. could change depending on complexity, closeness?
           % if change source to ~(rand(1)-1/2)*2*h/10, need to increase ntm to ~32
 S = mySurfaceSph(ntm); % 3d spherical harmonics
 npts = numel(S.x(1,:)); % num of sources per particle, assume same spherical harmonics discretization
@@ -112,7 +111,7 @@ for i = 1:nmpole
 end % why imaginary part so small?
 % mps call: multipole to local operator
 local = zeros(nd*ntot,1); ier = 0; 
-local = lfmm3d_mps0_mex(nd, eps, nmpole, cmpole, rmpole, mterms, mpole, impole, local, ier);
+local = lfmm3d_mps_mex(nd, eps, nmpole, cmpole, rmpole, mterms, mpole, impole, local, ier);
 
 % post process
 interms = (mterms(1)+1)*(2*mterms(1)+1); % same for all mps centers

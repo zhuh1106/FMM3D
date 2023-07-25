@@ -1243,3 +1243,10 @@ end
   if(ifppregtarg >= 2), U.pretarg = pretarg; end;
   if(ifppregtarg >= 3), U.gradtarg = squeeze(reshape(gradtarg,[nd,3,3,nt])); end;
 end
+
+% ---------------------------------------------------------------------
+@function local = lfmm3d_mps_mex(nd, eps ,nmpole, cmpole, rmpole, mterms, mpole, impole, local, ier)
+ntmp = numel(mpole);
+mtmp = numel(local);
+# FORTRAN lfmm3d_mps(int[1] nd, double[1] eps , int[1] nmpole, double[3,nmpole] cmpole, double[nmpole] rmpole, int[nmpole] mterms, dcomplex[ntmp] mpole, int[nmpole] impole, inout dcomplex[mtmp] local, int[1] ier);
+end
