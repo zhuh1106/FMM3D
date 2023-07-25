@@ -545,10 +545,14 @@ c      initialize various tree lists
      1      treecenters,itree(ipointer(3)),itree(ipointer(4)),
      2      itree(ipointer(5)),isep,itree(ipointer(6)),mnbors,
      2      itree(ipointer(7)),iper,mnlist1,mnlist2,mnlist3,mnlist4)
+       print *, "mnlist4 = ", mnlist4
        allocate(list1(mnlist1,nboxes),nlist1(nboxes))
        allocate(list2(mnlist2,nboxes),nlist2(nboxes))
        allocate(list3(mnlist3,nboxes),nlist3(nboxes))
        allocate(list4(mnlist4,nboxes),nlist4(nboxes))
+
+       print *, "list4: ", list4(1,1:4)
+
        call computelists(nlevels,nboxes,itree(ipointer(1)),boxsize,
      1      treecenters,itree(ipointer(3)),itree(ipointer(4)),
      2      itree(ipointer(5)),isep,itree(ipointer(6)),mnbors,
@@ -1298,62 +1302,62 @@ C$         ithd=omp_get_thread_num()
            endif
            if(nlist3(ibox).gt.0.and.npts.gt.0) then
              print *, "this is actually processed..."
-    !          do i=1,8
-    !           call mpzero(nd,iboxlexp(1,i,ithd),nterms(ilev))
-    !          enddo
+             do i=1,8
+              call mpzero(nd,iboxlexp(1,i,ithd),nterms(ilev))
+             enddo
              
-    !          call  getlist3pwallprocessudnsewexp0(ibox,boxsize(ilev),
-    !  1            nboxes,nlist3(ibox),list3(1,ibox),
-    !  2            isep,treecenters,nd,
-    !  3            nterms(ilev),iboxlexp(1,1,ithd),rlams,
-    !  4            whts,nlams,nfourier,nphysical,nthmax,
-    !  5            nexptot,nexptotp,mexp,
-    !  6            mexpf1(1,1,ithd),mexpf2(1,1,ithd),
-    !  7            mexpp1(1,1,ithd),mexpp2(1,1,ithd),
-    !  8            mexppall(1,1,1,ithd),mexppall(1,1,2,ithd),
-    !  9            xshift,yshift,zshift,fexpback,nn,rlsc,rscpow,
-    !  9            rdplus,rdminus)
+             call  getlist3pwallprocessudnsewexp0(ibox,boxsize(ilev),
+     1            nboxes,nlist3(ibox),list3(1,ibox),
+     2            isep,treecenters,nd,
+     3            nterms(ilev),iboxlexp(1,1,ithd),rlams,
+     4            whts,nlams,nfourier,nphysical,nthmax,
+     5            nexptot,nexptotp,mexp,
+     6            mexpf1(1,1,ithd),mexpf2(1,1,ithd),
+     7            mexpp1(1,1,ithd),mexpp2(1,1,ithd),
+     8            mexppall(1,1,1,ithd),mexppall(1,1,2,ithd),
+     9            xshift,yshift,zshift,fexpback,nn,rlsc,rscpow,
+     9            rdplus,rdminus)
 
-    !         !  if (ibox.eq.148) then
-    !         !   open(1, file = 'mps_data.dat')
-    !         !   do i=1,8
-    !         !     do j=1,nd*(nterms(ilev)+1)*(2*nterms(ilev)+1)
-    !         !       write(1,*) imag(iboxlexp(j,i,ithd))
-    !         !     enddo
-    !         !   enddo
-    !         !   close(1) 
-    !         !  endif
+            !  if (ibox.eq.148) then
+            !   open(1, file = 'mps_data.dat')
+            !   do i=1,8
+            !     do j=1,nd*(nterms(ilev)+1)*(2*nterms(ilev)+1)
+            !       write(1,*) imag(iboxlexp(j,i,ithd))
+            !     enddo
+            !   enddo
+            !   close(1) 
+            !  endif
      
-    !          istart = isrcse(1,ibox)
-    !          iend = isrcse(2,ibox)
-    !          npts = iend-istart+1
-    !          if(npts.gt.0) then
-    !            call subdividebox(cmpolesort(1,istart),npts,
-    !  1              treecenters(1,ibox),boxsize(ilev),
-    !  2              iboxsrcind(1,ithd),iboxfl(1,1,ithd),
-    !  3              iboxsubcenters(1,1,ithd))
-    !            do i=istart,iend
-    !              iboxisort_tmp(i-istart+1,ithd) = i
-    !            enddo
-    !            call ireorderf(1,npts,iboxisort_tmp(1,ithd),
-    !  1              iboxisort(1,ithd),iboxsrcind(1,ithd))
-    !            do i=1,8
-    !              if(iboxfl(1,i,ithd).gt.0) then
-    !                jstart=iboxfl(1,i,ithd)
-    !                jend=iboxfl(2,i,ithd)
-    !                npts0=jend-jstart+1
-    !                do j = jstart,jend
-    !                  k = iboxisort(j,ithd)
-    !                  call l3dlocloc(nd,scales(ilev),
-    !  1                    iboxsubcenters(1,i,ithd),iboxlexp(1,i,ithd),
-    !  2                    nterms(ilev),
-    !  3                    rmpolesort(k),cmpolesort(1,k),
-    !  4                    localsort(impolesort(k)), mtermssort(k),
-    !  5                    dc,lca)
-    !                enddo
-    !              endif
-    !            enddo
-    !          endif
+             istart = isrcse(1,ibox)
+             iend = isrcse(2,ibox)
+             npts = iend-istart+1
+             if(npts.gt.0) then
+               call subdividebox(cmpolesort(1,istart),npts,
+     1              treecenters(1,ibox),boxsize(ilev),
+     2              iboxsrcind(1,ithd),iboxfl(1,1,ithd),
+     3              iboxsubcenters(1,1,ithd))
+               do i=istart,iend
+                 iboxisort_tmp(i-istart+1,ithd) = i
+               enddo
+               call ireorderf(1,npts,iboxisort_tmp(1,ithd),
+     1              iboxisort(1,ithd),iboxsrcind(1,ithd))
+               do i=1,8
+                 if(iboxfl(1,i,ithd).gt.0) then
+                   jstart=iboxfl(1,i,ithd)
+                   jend=iboxfl(2,i,ithd)
+                   npts0=jend-jstart+1
+                   do j = jstart,jend
+                     k = iboxisort(j,ithd)
+                     call l3dlocloc(nd,scales(ilev),
+     1                    iboxsubcenters(1,i,ithd),iboxlexp(1,i,ithd),
+     2                    nterms(ilev),
+     3                    rmpolesort(k),cmpolesort(1,k),
+     4                    localsort(impolesort(k)), mtermssort(k),
+     5                    dc,lca)
+                   enddo
+                 endif
+               enddo
+             endif
            endif
          enddo 
          deallocate(iboxlexp)

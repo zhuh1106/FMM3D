@@ -17,6 +17,12 @@ S.upFreq = p;
 S.filterFreq = p;
 [gp,gpAll]= calcGeoProp(S);
 S.geoProp = gp;
+% a few additional 
+S.x = [S.cart.x,S.cart.y,S.cart.z]'; % source on the boundary surface
+S.nx = [S.geoProp.nor.x S.geoProp.nor.y S.geoProp.nor.z]';
+[~, gwt]=g_grid(p+1);
+wt = pi/p*repmat(gwt', 2*p, 1)./sin(gl_grid(p));
+S.w = (S.geoProp.W.*wt(:))'; % quadr weights (GL x Trapezoidal)
 end
 
 function [gp,gpAll]= calcGeoProp(S)
