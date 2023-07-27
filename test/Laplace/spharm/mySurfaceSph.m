@@ -1,4 +1,9 @@
-function S = mySurfaceSph(p)
+function [S,S_up] = mySurfaceSph(p)
+S = mySurfaceSph0(p);
+S_up = mySurfaceSph0(p+1);
+end
+
+function S = mySurfaceSph0(p)
 % Shape = 'sphere'
 [u, v] = gl_grid(p);
 ax = 1; ay = 1; az = 1; rho = 1;

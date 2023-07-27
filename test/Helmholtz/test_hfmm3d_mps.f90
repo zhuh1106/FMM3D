@@ -148,7 +148,7 @@ program test_hfmm3d_mp2loc
   end do
 
   
-  nlege = 400
+  nlege = 300
   lw = 5*(nlege+1)**2
   allocate( wlege(lw) )
 

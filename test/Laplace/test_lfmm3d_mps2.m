@@ -2,9 +2,6 @@
 %
 %
 
-profile clear
-profile on
-
 clear 
 addpath('../../matlab/')
 
@@ -14,6 +11,7 @@ n1 = 5;
 nmpole = n1^3;
 h = 1.0d0/(n1+1);
 radius = h/8;
+eps = 1e-15;
 
 ntm = 16; % mterms, same mpole order for all mps centers. could change depending on complexity, closeness?
           % if change source to ~(rand(1)-1/2)*2*h/10, need to increase ntm to ~32
@@ -68,60 +66,21 @@ for i = 1:nmpole % loop over mps center, subtract particle self
 end
 
 %%% mps setup
-% set mps center (center of each cluster of particles)
-cmpole = zeros(3,nmpole);
+% set mps parameter
 shift = h/10;
 disp(['shift = ', num2str(shift), ' ']);
-for i = 1:nmpole
-  cmpole(1,i) = mean(source(1,((i-1)*npts+1):i*npts)); % maybe should choose average as mpole center
-  cmpole(2,i) = mean(source(2,((i-1)*npts+1):i*npts));
-  cmpole(3,i) = mean(source(3,((i-1)*npts+1):i*npts));
-end
-% form a multipole expansion at each center
-mterms=zeros(nmpole,1);
-impole=zeros(nmpole,1); % index of mpole for each mps center
-ntot = 0; % total num of multipole expansion coefficients
-for i = 1:nmpole
-  mterms(i) = ntm;
-  ntot = ntot + (mterms(i)+1)*(2*mterms(i)+1);
-end
-mpole = zeros(nd*ntot,1); % nd = 1 for now, complex
-impole(1) = 1;
-for i = 1:nmpole-1 % loop over mps centers
-  ilen = (mterms(i)+1)*(2*mterms(i)+1);
-  impole(i+1) = impole(i) + nd*ilen;
-end 
-nlege = 300;
-lw = 2*(nlege+1)^2; % dimension
-wlege = zeros(lw,1);
-lused = 0;
-[wlege,lused] = ylgndrfwini_mex(nlege, wlege, lw, lused); % recursion coefficients
-npts; % 
 rscale = 1;
 sc = shift;
 if sc < 1 
   rscale = sc; % what is this doing?
 end
-rmpole = zeros(nmpole,1); % rescaling factor for each mps center
-for i = 1:nmpole
-  rmpole(i) = rscale;
-  mpoletmp = zeros(nd,mterms(i)+1,2*mterms(i)+1);
-  mpoletmp =  l3dformmpc_mex(nd, rscale, source(:,((i-1)*npts+1):i*npts), charge(:,((i-1)*npts+1):i*npts), npts, cmpole(:,i), mterms(i), mpoletmp, wlege, nlege);
-  mpole(impole(i):impole(i)+nd*(mterms(i)+1)*(2*mterms(i)+1)-1) = mpole(impole(i):impole(i)+nd*(mterms(i)+1)*(2*mterms(i)+1)-1) + mpoletmp(:);
-end % why imaginary part so small?
-% mps call: multipole to local operator
+% form all multipole expansion (just l3dformmpc, loop over cmpole)
+[cmpole,rmpole,mterms,mpole,impole,ntot,nlege,wlege,lused] = myl3dformmpc(nd, rscale, source, charge, npts, ntm);
+% multipole to local expansion
 local = zeros(nd*ntot,1); ier = 0; 
-local = lfmm3d_mps_mex(nd, eps, nmpole, cmpole, rmpole, mterms, mpole, impole, local, ier);
-
-% post process
-interms = (mterms(1)+1)*(2*mterms(1)+1); % same for all mps centers
-pot2 = zeros(nd,ns);
-npts;
-for i = 1:nmpole % loop over mps center, ship local expansion to targ
-  pot2tmp = zeros(nd,npts);
-  pot2tmp = l3dtaevalp_mex(nd, rmpole(i), cmpole(:,i), local(impole(i):impole(i)+nd*(mterms(i)+1)*(2*mterms(i)+1)-1), mterms(i), source(:,((i-1)*npts+1):i*npts), npts, pot2tmp, wlege, nlege);
-  pot2(:,((i-1)*npts+1):i*npts) = pot2(:,((i-1)*npts+1):i*npts) + pot2tmp;
-end
+local = lfmm3d_mps(nd, eps, nmpole, cmpole, rmpole, mterms, mpole, impole, local, ier);
+% local expansion to pot
+pot2 = myl3dtaevalp(nd, rmpole, cmpole, impole, local, mterms, source, npts, wlege, nlege);
 
 disp(['mps vs direct error = ', num2str(max(abs(pot-pot2))/max(abs(pot))), ' ']);
 
@@ -129,6 +88,5 @@ figure(1),clf,
 plot3(source(1,:),source(2,:),source(3,:),'.'); axis equal, hold on
 plot3(cmpole(1,:),cmpole(2,:),cmpole(3,:),'*')
 
-profile viewer
 
 keyboard

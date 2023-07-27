@@ -1245,8 +1245,48 @@ end
 end
 
 % ---------------------------------------------------------------------
-@function local = lfmm3d_mps_mex(nd, eps ,nmpole, cmpole, rmpole, mterms, mpole, impole, local, ier)
+@function local = lfmm3d_mps(nd, eps ,nmpole, cmpole, rmpole, mterms, mpole, impole, local, ier)
 ntmp = numel(mpole);
 mtmp = numel(local);
 # FORTRAN lfmm3d_mps(int[1] nd, double[1] eps , int[1] nmpole, double[3,nmpole] cmpole, double[nmpole] rmpole, int[nmpole] mterms, dcomplex[ntmp] mpole, int[nmpole] impole, inout dcomplex[mtmp] local, int[1] ier);
+end
+
+% ---------------------------------------------------------------------
+@function pot = l3dtaevalp(nd,rscale,center,mpole,nterms,ztarg,ntarg,pot,wlege,nlege)
+ndnterms = nd*(nterms+1);
+ntermst2p1 = 2*nterms+1;
+mpole = reshape(mpole,ndnterms,ntermst2p1);
+nwlege = numel(wlege);
+# FORTRAN l3dtaevalp(int[1] nd, double[1] rscale, double[3] center, dcomplex[ndnterms,ntermst2p1] mpole, int[1] nterms, double[3,ntarg] ztarg, int[1] ntarg, inout double[nd,ntarg] pot, double[nwlege] wlege, int[1] nlege);
+end
+
+% ---------------------------------------------------------------------
+@function [w,lused] = ylgndrfwini(nmax, w, lw, lused)
+% note: irat1=1, irat2=1+(nmax+1)^2 seem to be two starting indices 
+% the fortran subroutine then calls ylgndrini, which initializes two size (nmax+1)^2 double precision arraries rat1 & rat2
+% the two get assigned to w, which has a length of 2*(nmax+1)^2
+% in the case of Laplace, l3dformmpc declares real *8 w(0:nlege,0:nlege), then calls ylgndrfw, which asks for w(irat1), w(irat2) when nterms (multipole expansion order) is greater than nlege
+% Q: is rat2 for legendre derivative?
+%
+nw = length(w);
+# FORTRAN ylgndrfwini(int[1] nmax, inout double[nw] w, int[1] lw, inout int[1] lused);
+end
+
+% ---------------------------------------------------------------------
+@function mpole = l3dformmpc(nd,rscale,sources,charge,ns,center,nterms,mpole,wlege,nlege)
+ndnterms = nd*(nterms+1);
+ntermst2p1 = 2*nterms+1;
+mpole = reshape(mpole,ndnterms,ntermst2p1);
+nwlege = numel(wlege);
+# FORTRAN l3dformmpc(int[1] nd, double[1] rscale, double[3,ns] sources, double[nd,ns] charge, int[1] ns, double[3] center, int[1] nterms, inout dcomplex[ndnterms,ntermst2p1] mpole, double[nwlege] wlege, int[1] nlege);
+mpole = reshape(mpole,nd,nterms+1,2*nterms+1);
+end
+
+% ---------------------------------------------------------------------
+@function pot = l3dtaevalp(nd,rscale,center,mpole,nterms,ztarg,ntarg,pot,wlege,nlege)
+ndnterms = nd*(nterms+1);
+ntermst2p1 = 2*nterms+1;
+mpole = reshape(mpole,ndnterms,ntermst2p1);
+nwlege = numel(wlege);
+# FORTRAN l3dtaevalp(int[1] nd, double[1] rscale, double[3] center, dcomplex[ndnterms,ntermst2p1] mpole, int[1] nterms, double[3,ntarg] ztarg, int[1] ntarg, inout double[nd,ntarg] pot, double[nwlege] wlege, int[1] nlege);
 end
