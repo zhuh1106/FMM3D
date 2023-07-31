@@ -5,6 +5,8 @@
 %
 % Hai 07/30/23, finalize laplace mps interface 07/31/23
 
+profile clear
+profile on
 clear all
 
 addpath ./spharm/; 
@@ -23,14 +25,15 @@ if_up = true;
 
 % 
 %===== follow mps test geometry configuration =====
-n1 = 2;
+n1 = 3; % ~ 30s, 38 iteration, 8 core macbook pro
+% n1 = 5; % ~ 3min, 53 iteration, 8 core macbook pro
 h = 1.0d0/(n1+1);
 radius = h/8;
 s = []; y_source.x = []; y_source.w = []; pt_source = [];
 ijk = 0;
 for i = 1:n1
   for j = 1:n1 
-    k = 1; % add loop later
+    for k = 1:n1 
       ijk = ijk + 1;
       s{ijk} = S0; % copy
       s{ijk}.x(1,:) = h*i + radius*S0.x(1,:); % scale and shift x
@@ -41,16 +44,21 @@ for i = 1:n1
       y_source.x = [y_source.x h*[i;j;k]+radius/2*(rand(3,1)-1/2)];
       y_source.w = [y_source.w 1];
       pt_source = [pt_source 1];
+    end
   end
 end
 
 
 % 
 %===== boundary condition =====
-S = struct('x',[s{1}.x s{2}.x s{3}.x s{4}.x],'nx',[s{1}.nx s{2}.nx s{3}.nx s{4}.nx],'w',[s{1}.w s{2}.w s{3}.w s{4}.w]);
-Ahom = Lap3dSLPmat(S,y_source);
-rhs = Ahom*pt_source(:); 
-rhsc = [shcMat*rhs(1:end/4);shcMat*rhs(end/4+1:2*end/4);shcMat*rhs(2*end/4+1:3*end/4);shcMat*rhs(3*end/4+1:end)];
+sx = cellfun(@(p)p.x,s,'uniformoutput',0); snx = cellfun(@(p)p.nx,s,'uniformoutput',0); sw = cellfun(@(p)p.w,s,'uniformoutput',0); 
+sx = horzcat(sx{:}); snx = horzcat(snx{:}); sw = horzcat(sw{:});
+S = struct('x',sx,'nx',snx,'w',sw);
+rhs = Lap3dSLPfmm(S,y_source,pt_source(:),1e-14);
+rhsc = zeros(numel(s)*(p+1)^2,1);
+for k=1:numel(s) % from rhs to rhs coefs
+  rhsc((k-1)*(p+1)^2+(1:(p+1)^2)) = shcMat*rhs((k-1)*((p+1)*2*p)+(1:(p+1)*2*p));
+end
 
 
 % 
@@ -58,7 +66,7 @@ rhsc = [shcMat*rhs(1:end/4);shcMat*rhs(end/4+1:2*end/4);shcMat*rhs(2*end/4+1:3*e
 % for laplace mps call
 nd = 1; rscale = radius; 
 npts = (p+1)*2*p; ntm = p;
-source = [s{1}.x s{2}.x s{3}.x s{4}.x]; nmpole = numel(s);
+source = S.x; nmpole = numel(s);
 cmpole = zeros(3,nmpole);
 rmpole = zeros(nmpole,1); % rescaling factor for each mps center
 mterms = zeros(nmpole,1); % multipole expansion order 
@@ -83,14 +91,16 @@ end
 %===== mps solve =====
 myoperator = @(x) lfmm3d_mps_op(GSMatn,local_shc1n,local_shc2n,mpole_shv1n,mpole_shv2n,x,nd,nmpole,cmpole,rmpole,mterms,impole);
 mucS = gmres(@(x) myoperator(x),rhsc,[],1e-14,100); % no null space
-muS = real([shvMat*mucS(1:end/4);shvMat*mucS(end/4+1:2*end/4);shvMat*mucS(2*end/4+1:3*end/4);shvMat*mucS(3*end/4+1:end)]); % coefs2vals
-
+muS = zeros(numel(s)*(p+1)*2*p,1);
+for k=1:numel(s) % from slp mu coefs to mu
+  muS((k-1)*((p+1)*2*p)+(1:(p+1)*2*p)) = real(shvMat*mucS((k-1)*(p+1)^2+(1:(p+1)^2)));
+end
 
 % 
 %===== verify solution =====
 t.x = [S.x + radius*S.nx, S.x + radius*3/4*S.nx, S.x + radius*1/2*S.nx];
-fhom = Lap3dSLPmat(t,y_source)*pt_source(:);
-fnumS = Lap3dSLPmat(t,S)*muS;
+fhom = Lap3dSLPfmm(t,y_source,pt_source(:),1e-14);
+fnumS = Lap3dSLPfmm(t,S,muS(:),1e-14);
 errS = abs(fnumS-fhom)/max(abs(fhom));
 % figure(1),clf,scatter3(S.x(1,:),S.x(2,:),S.x(3,:),[],rhs,'.'); hold on, axis equal, plot3(t.x(1,:),t.x(2,:),t.x(3,:),'.')
 figure(2),clf,
@@ -102,5 +112,6 @@ end
 caxis([-12 0])
 title(['Galerkin SLP p=' num2str(p) ', ' num2str(numel(rhsc)) 'x' num2str(numel(rhsc)) ', rank ' num2str(rank(GSMat0)*numel(s)) ', max err ' num2str(max(errS))], 'FontSize', 16)
 
+profile viewer
 
 keyboard
